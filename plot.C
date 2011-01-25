@@ -39,16 +39,19 @@ void plot(const char *prod, const char *name, const char* title, int logy,
   canvas->SetLogy(logy);
 
   // define the task with its relevant samples
-  TString dir = TString("/home/paus/cms/hist/") + TString(prod) +
-    TString("/t2mit/filefi/merged");
-  // make sure to decode soft link
-  FILE *f = gSystem->OpenPipe((TString("ls -l /home/paus/cms/hist/")+
-			       TString(prod)+
-			       TString("|tr -s ' '|cut -d ' ' -f11")).Data(),"r");
+  char homeDir[1024];
+  if (gSystem->Getenv("HOME"))
+    sprintf(homeDir,"%s",gSystem->Getenv("HOME"));
+  else {
+    printf(" HOME not defined. EXIT! (export HOME=/home/$USER ?)\n");
+    return;
+  } 
+  TString home = TString(homeDir);
+
   // now define sample
   TaskSamples* samples = new TaskSamples(prod,dir.Data());
   samples->SetNameTxt("hgg");
-  samples->ReadFile("/home/paus/cms/root");
+  samples->ReadFile((mitHgg + TString("/config")).Data());
   // plot what we want
   PlotTask   *plotTask = new PlotTask(samples,lumi);
   // adjust ranges if needed
@@ -74,8 +77,6 @@ void plot(const char *prod, const char *name, const char* title, int logy,
 
   return;
 }
-
-
   //  // adjust the default plot styles to our liking
   //  HistStyles *styles   = new HistStyles();
   //  HistStyle  *s        = 0;
@@ -105,4 +106,3 @@ void plot(const char *prod, const char *name, const char* title, int logy,
   //  s->SetMarkerSize (1.0);
   //  // set the new styles as the current styles
   //  plotTask->SetHistStyles(styles);
-
