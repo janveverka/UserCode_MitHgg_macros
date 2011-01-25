@@ -49,7 +49,7 @@ void plotsHgg(const char *prod = "hgg-v0", double lumi = 36.1)
   plot(prod,"h2PhotonPt",      "di-photon p_{T} [GeV/c]",     0, 0.,  0., 0., -1.,4,lumi);
   plot(prod,"h2PhotonMass",    "di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
   plot(prod,"h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
-  plot(prod,"h2SelePhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
+  //plot(prod,"h2SelePhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
   
   
   plot(prod,"hPhotonEt1",      "E_{T,1} [GeV]",               1, 0.,200., 0.005, -1.,1,lumi);
