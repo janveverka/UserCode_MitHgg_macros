@@ -22,41 +22,41 @@
 using namespace std;
 using namespace mithep;
 
-void plot(const char *prod, const char *name, const char* title, int logy,
-	  double xmin, double xmax, double ymin, double ymax,
-	  int nRebin, double lumi);
+void plot(const char *name, const char* title, int logy,
+          double xmin, double xmax, double ymin, double ymax,
+          int nRebin, double lumi);
 
 //==================================================================================================
-void plotsHgg(const char *prod = "hgg-v0", double lumi = 36.1)
+void plotsHgg(double lumi = 36.1)
 {
   // setup graphics stuff before starting
   MitStyle::Init();
   gROOT->Macro("$CMSSW_BASE/src/MitHgg/macros/plot.C+");
 
-  //plot(prod,"h2PhotonMass",    "di-photon mass [GeV/c^{2}]",0,60.,120.,0.,-1.,2,lumi);
-  //return;
+  plot("h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
+  return;
 
-  plot(prod,"hPhotonEta1",     "photon #eta_{1}",             0, 0.,  0., 0., 50.,2,lumi);
-  plot(prod,"hPhotonEta2",     "photon #eta_{2}",             0, 0.,  0., 0., 50.,2,lumi);
-  plot(prod,"hPhotonPhi1",     "photon #phi_{1}",             0, 0.,  0., 0., 75.,4,lumi);
-  plot(prod,"hPhotonPhi2",     "photon #phi_{2}",             0, 0.,  0., 0., 75.,4,lumi);
-  plot(prod,"hPhotonDelR",     "di-elec #Delta R",            0, 0.,  0., 0., -1.,2,lumi);
-  plot(prod,"hPhotonEt1",      "E_{T,1} [GeV]",               0, 0.,200., 0., -1.,1,lumi);
-  plot(prod,"hPhotonEt2",      "E_{T,2} [GeV]",               0, 0.,200., 0., -1.,1,lumi);
-  plot(prod,"hPhotonR91",      "R9_{1}",                      0, 0.,  0., 0.,-1.0,2,lumi);
-  plot(prod,"hPhotonR92",      "R9_{2}",                      0, 0.,  0., 0.,-1.0,2,lumi);
-  plot(prod,"h2R9PhotonMass",  "di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0.,-1.0,8,lumi);
-  plot(prod,"h2PhotonPt",      "di-photon p_{T} [GeV/c]",     0, 0.,  0., 0., -1.,4,lumi);
-  plot(prod,"h2PhotonMass",    "di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
-  plot(prod,"h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
-  //plot(prod,"h2SelePhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
-  
-  
-  plot(prod,"hPhotonEt1",      "E_{T,1} [GeV]",               1, 0.,200., 0.005, -1.,1,lumi);
-  plot(prod,"hPhotonEt2",      "E_{T,2} [GeV]",               1, 0.,200., 0.005, -1.,1,lumi);
-  plot(prod,"h2PhotonPt",      "di-photon p_{T} [GeV/c]",     1, 0.,200., 0.005, -1.,2,lumi);
-  
-  plot(prod,"h2PhotonMass",    "di-photon mass [GeV/c^{2}]",  1, 0.,  0., 0.005, -1.,8,lumi);
+  plot("hPhotonEta1",     "photon #eta_{1}",             0, 0.,  0., 0., 50.,2,lumi);
+  plot("hPhotonEta2",     "photon #eta_{2}",             0, 0.,  0., 0., 50.,2,lumi);
+  plot("hPhotonPhi1",     "photon #phi_{1}",             0, 0.,  0., 0., 75.,4,lumi);
+  plot("hPhotonPhi2",     "photon #phi_{2}",             0, 0.,  0., 0., 75.,4,lumi);
+  plot("hPhotonDelR",     "di-elec #Delta R",            0, 0.,  0., 0., -1.,2,lumi);
+  plot("hPhotonEt1",      "E_{T,1} [GeV]",               0, 0.,200., 0., -1.,1,lumi);
+  plot("hPhotonEt2",      "E_{T,2} [GeV]",               0, 0.,200., 0., -1.,1,lumi);
+  plot("hPhotonR91",      "R9_{1}",                      0, 0.,  0., 0.,-1.0,2,lumi);
+  plot("hPhotonR92",      "R9_{2}",                      0, 0.,  0., 0.,-1.0,2,lumi);
+  plot("h2R9PhotonMass",  "di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0.,-1.0,8,lumi);
+  plot("h2PhotonPt",      "di-photon p_{T} [GeV/c]",     0, 0.,  0., 0., -1.,4,lumi);
+  plot("h2PhotonMass",    "di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
+  plot("h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
+  //plot("h2SelePhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
+
+
+  plot("hPhotonEt1",      "E_{T,1} [GeV]",               1, 0.,200., 0.005, -1.,1,lumi);
+  plot("hPhotonEt2",      "E_{T,2} [GeV]",               1, 0.,200., 0.005, -1.,1,lumi);
+  plot("h2PhotonPt",      "di-photon p_{T} [GeV/c]",     1, 0.,200., 0.005, -1.,2,lumi);
+
+  plot("h2PhotonMass",    "di-photon mass [GeV/c^{2}]",  1, 0.,  0., 0.005, -1.,8,lumi);
 
   return;
 }

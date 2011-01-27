@@ -23,13 +23,15 @@
 using namespace std;
 using namespace mithep;
 
+TString getEnv(const char* name);
+
 //==================================================================================================
 void plot()
 {
   printf("\n Hey Higgs to Gamma Gamma folks.\n\n   Welcome to the plot package.\n\n");
 }
 
-void plot(const char *prod, const char *name, const char* title, int logy,
+void plot(const char *name, const char* title, int logy,
 	  double xmin, double xmax, double ymin, double ymax,
 	  int nRebin, double lumi)
 {
@@ -38,19 +40,16 @@ void plot(const char *prod, const char *name, const char* title, int logy,
   TCanvas *canvas = MitStyle::MakeCanvas("c","c");
   canvas->SetLogy(logy);
 
-  // define the task with its relevant samples
-  char homeDir[1024];
-  if (gSystem->Getenv("HOME"))
-    sprintf(homeDir,"%s",gSystem->Getenv("HOME"));
-  else {
-    printf(" HOME not defined. EXIT! (export HOME=/home/$USER ?)\n");
-    return;
-  } 
-  TString home = TString(homeDir);
+  TString home   = getEnv("HOME");
+  TString mitHgg = getEnv("MIT_HGG_DIR");
+  TString hstDir = getEnv("MIT_HIST_DIR");
+  TString anaCfg = getEnv("MIT_ANA_CFG");
+  TString prdCfg = getEnv("MIT_PROD_CFG");
+  //TString dir    = home+TString("/cms/hist/")+TString(prod)+TString("/t2mit/filefi/merged");
 
   // now define sample
-  TaskSamples* samples = new TaskSamples(prod,dir.Data());
-  samples->SetNameTxt("hgg");
+  TaskSamples* samples = new TaskSamples(prdCfg.Data(),hstDir.Data());
+  samples->SetNameTxt(anaCfg.Data());
   samples->ReadFile((mitHgg + TString("/config")).Data());
   // plot what we want
   PlotTask   *plotTask = new PlotTask(samples,lumi);
@@ -76,6 +75,15 @@ void plot(const char *prod, const char *name, const char* title, int logy,
     canvas->SaveAs((TString("png/")+TString(name)+TString("_lin.png")).Data());
 
   return;
+}
+
+TString getEnv(const char* name)
+{
+  if (! gSystem->Getenv(name)) {
+    printf(" Environment variable: %s  not defined. EXIT!\n",name);
+    return TString("");
+  } 
+  return TString(gSystem->Getenv(name));  
 }
   //  // adjust the default plot styles to our liking
   //  HistStyles *styles   = new HistStyles();
