@@ -35,18 +35,15 @@ void plot(const char *name, const char* title, int logy,
 	  double xmin, double xmax, double ymin, double ymax,
 	  int nRebin, double lumi)
 {
-
   // use logarithmic scale?
   TCanvas *canvas = MitStyle::MakeCanvas("c","c");
   canvas->SetLogy(logy);
-
+  // read all environment variables
   TString home   = getEnv("HOME");
   TString mitHgg = getEnv("MIT_HGG_DIR");
   TString hstDir = getEnv("MIT_HIST_DIR");
   TString anaCfg = getEnv("MIT_ANA_CFG");
   TString prdCfg = getEnv("MIT_PROD_CFG");
-  //TString dir    = home+TString("/cms/hist/")+TString(prod)+TString("/t2mit/filefi/merged");
-
   // now define sample
   TaskSamples* samples = new TaskSamples(prdCfg.Data(),hstDir.Data());
   samples->SetNameTxt(anaCfg.Data());
@@ -62,13 +59,12 @@ void plot(const char *name, const char* title, int logy,
     plotTask->SetHistMinimum(ymin);
   if (ymax>0)
     plotTask->SetHistMaximum(ymax);
-
   // rebinning
   plotTask->SetNRebin     (nRebin);
   // set the titles
   plotTask->SetAxisTitles(title,"Number of Events");
   plotTask->PlotStack("",name);
-
+  // make a png file
   if (logy == 1)
     canvas->SaveAs((TString("png/")+TString(name)+TString("_log.png")).Data());
   else

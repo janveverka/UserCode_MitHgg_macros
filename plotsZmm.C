@@ -22,7 +22,7 @@
 using namespace std;
 using namespace mithep;
 
-void plot(const char *prod, const char *name, const char* title, int logy,
+void plot(const char *name, const char* title, int logy,
 	  double xmin, double xmax, double ymin, double ymax,
 	  int nRebin, double lumi);
 
@@ -34,26 +34,26 @@ void plotsZmm(const char *prod = "hgg-v0", double lumi = 36.1)
   MitStyle::Init();
   gROOT->Macro("$CMSSW_BASE/src/MitHgg/macros/plot.C+");
   
-  plot(prod,"h2MuonMass",    "di-muon mass [GeV/c^{2}]",1,60.,120.,0.,-1.,2,lumi);
+  plot("h2MuonMass",    "di-muon mass [GeV/c^{2}]",1,60.,120.,0.,-1.,2,lumi);
   return;
 
-  plot(prod,"hMuonEta1",     "muon #eta_{1}",           0, 0.,  0., 0., 50.,2,lumi);
-  plot(prod,"hMuonEta2",     "muon #eta_{2}",           0, 0.,  0., 0., 50.,2,lumi);
-  plot(prod,"hMuonPhi1",     "muon #phi_{1}",           0, 0.,  0., 0., 75.,4,lumi);
-  plot(prod,"hMuonPhi2",     "muon #phi_{2}",           0, 0.,  0., 0., 75.,4,lumi);
-  plot(prod,"hMuonDelR",     "di-muon #Delta R",        0, 0.,  0., 0., -1.,2,lumi);
-  plot(prod,"hMuonEt1",      "E_{T,1} [GeV]",           0, 0.,200., 0., -1.,1,lumi);
-  plot(prod,"hMuonEt2",      "E_{T,2} [GeV]",           0, 0.,200., 0., -1.,1,lumi);
-  plot(prod,"h2MuonPt",      "di-muon p_{T} [GeV/c]",   0, 0.,200., 0., -1.,2,lumi);
-  plot(prod,"h2MuonMass",    "di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
-  plot(prod,"h2TrigMuonMass","di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
-  plot(prod,"h2SeleMuonMass","di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
+  plot("hMuonEta1",     "muon #eta_{1}",           0, 0.,  0., 0., 50.,2,lumi);
+  plot("hMuonEta2",     "muon #eta_{2}",           0, 0.,  0., 0., 50.,2,lumi);
+  plot("hMuonPhi1",     "muon #phi_{1}",           0, 0.,  0., 0., 75.,4,lumi);
+  plot("hMuonPhi2",     "muon #phi_{2}",           0, 0.,  0., 0., 75.,4,lumi);
+  plot("hMuonDelR",     "di-muon #Delta R",        0, 0.,  0., 0., -1.,2,lumi);
+  plot("hMuonEt1",      "E_{T,1} [GeV]",           0, 0.,200., 0., -1.,1,lumi);
+  plot("hMuonEt2",      "E_{T,2} [GeV]",           0, 0.,200., 0., -1.,1,lumi);
+  plot("h2MuonPt",      "di-muon p_{T} [GeV/c]",   0, 0.,200., 0., -1.,2,lumi);
+  plot("h2MuonMass",    "di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
+  plot("h2TrigMuonMass","di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
+  plot("h2SeleMuonMass","di-muon mass [GeV/c^{2}]",0,60.,120., 0., -1.,2,lumi);
 
-  plot(prod,"hMuonEt1",      "E_{T,1} [GeV]",           1, 0.,200., 0.005, -1.,1,lumi);
-  plot(prod,"hMuonEt2",      "E_{T,2} [GeV]",           1, 0.,200., 0.005, -1.,1,lumi);
-  plot(prod,"h2MuonPt",      "di-muon p_{T} [GeV/c]",   1, 0.,200., 0.005, -1.,2,lumi);
+  plot("hMuonEt1",      "E_{T,1} [GeV]",           1, 0.,200., 0.005, -1.,1,lumi);
+  plot("hMuonEt2",      "E_{T,2} [GeV]",           1, 0.,200., 0.005, -1.,1,lumi);
+  plot("h2MuonPt",      "di-muon p_{T} [GeV/c]",   1, 0.,200., 0.005, -1.,2,lumi);
 
-  plot(prod,"h2MuonMass",    "di-muon mass [GeV/c^{2}]",1, 0.,  0., 0.005, -1.,2,lumi);
+  plot("h2MuonMass",    "di-muon mass [GeV/c^{2}]",1, 0.,  0., 0.005, -1.,2,lumi);
 
   return;
 }
