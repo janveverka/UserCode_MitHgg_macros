@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: runHgg.C,v 1.1 2011/01/24 14:57:09 paus Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -41,8 +41,8 @@ void runHgg(const char *fileset    = "0000",
     printf(" JSON file was not properly defined. EXIT!\n");
     return;
   } 
-  TString jsonFile = TString("/home/paus/cms/root/json/") + TString(json);
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/paus/cms/root/json/~") != 0) );
+  TString jsonFile = TString("/home/cmsprod/json/") + TString(json);
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/cmsprod/json/~") != 0) );
 
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -72,11 +72,11 @@ void runHgg(const char *fileset    = "0000",
   runLumiSel->SetAcceptMC(kTRUE);                          // Monte Carlo events are always accepted
 
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/paus/cms/root/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/paus/cms/root/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/cmsprod/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/cmsprod/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/paus/cms/root/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/cmsprod/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
@@ -224,7 +224,7 @@ void runHgg(const char *fileset    = "0000",
   zmmMod->SetMuonName       (muonId->GetOutputName());
   zmmMod->SetMuonsFromBranch(kFALSE);
   zmmMod->SetOverlapCut(double(overlapCut));
-  if (jsonFile.CompareTo("/home/paus/cms/root/json/~") != 0)
+  if (jsonFile.CompareTo("/home/cmsprod/json/~") != 0)
     zmmMod->SetIsData(kTRUE);
   else
     zmmMod->SetIsData(kFALSE);
@@ -234,7 +234,7 @@ void runHgg(const char *fileset    = "0000",
   zeeMod->SetElecName       (elecId->GetOutputName());
   zeeMod->SetElecsFromBranch(kFALSE);
   zeeMod->SetOverlapCut     (double(overlapCut));
-  if (jsonFile.CompareTo("/home/paus/cms/root/json/~") != 0)
+  if (jsonFile.CompareTo("/home/cmsprod/json/~") != 0)
     zeeMod->SetIsData(kTRUE);
   else
     zeeMod->SetIsData(kFALSE);
@@ -243,7 +243,7 @@ void runHgg(const char *fileset    = "0000",
   hggMod->SetPhotonName       (photId->GetOutputName());
   hggMod->SetPhotonsFromBranch(kFALSE);
   hggMod->SetOverlapCut(double(overlapCut));
-  if (jsonFile.CompareTo("/home/paus/cms/root/json/~") != 0)
+  if (jsonFile.CompareTo("/home/cmsprod/json/~") != 0)
     hggMod->SetIsData(kTRUE);
   else
     hggMod->SetIsData(kFALSE);
