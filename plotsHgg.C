@@ -33,35 +33,16 @@ void plotsHgg(double lumi = 3000.)
   MitStyle::Init();
   gROOT->Macro("$CMSSW_BASE/src/MitHgg/macros/plot.C+");
 
-  TString draw = "hmass";
- // TString cut = "pt1>40.0 && pt2>30.0 && (!isconverted1 || (eoverp1<2.0 && eoverp1>0.8 && abs(detaconv1)<0.01 && abs(dphiconv1)<0.01) ) && (!isconverted2 || (eoverp2<2.0 && eoverp2>0.8 && abs(detaconv2)<0.01 && abs(dphiconv2)<0.01) )";
-  //TString cut = "pt1>40.0 && pt2>30.0 && isconverted1 && isconverted2";
-  //TString cut = "pt1>40.0 && pt2>30.0 && (isconverted1 && (eoverp1<2.0 && eoverp1>0.8 && abs(detaconv1)<0.01 && abs(dphiconv1)<0.01) ) || (isconverted2 && (eoverp2<2.0 && eoverp2>0.8 && abs(detaconv2)<0.01 && abs(dphiconv2)<0.01) )";
-// TString cut = "pt1>40.0 && pt2>30.0 && ( (!isconverted1 && !haspixelseed1) || (isconverted1 && eoverp1>0.8 && eoverp1<2.0 && abs(detaconv1)<0.01 && abs(dphiconv1)<0.01) ) &&  ( (!isconverted2 && !haspixelseed2) || (isconverted2 && eoverp2>0.8 && eoverp2<2.0 && abs(detaconv2)<0.01 && abs(dphiconv2)<0.01) )";
- //TString cut = "pt1>40.0 && pt2>30.0 && ( (!isconverted1 && !haspixelseed1) || (isconverted1 && eoverp1>0.8 && eoverp1<2.0 && abs(detaconv1)<0.01 && abs(dphiconv1)<0.01) ) &&  ( (!isconverted2 && !haspixelseed2) || (isconverted2 && eoverp2>0.8 && eoverp2<2.0 && abs(detaconv2)<0.01 && abs(dphiconv2)<0.01) ) && (isconverted1+isconverted2)>0 && !haspixelseed1 && !haspixelseed2";
-//TString cut = "pt1>40.0 && pt2>30.0 && (isconverted1 && eoverp1<2.0 && eoverp1>0.8 && abs(detaconv1)<0.01 && abs(dphiconv1)<0.01 && abs(eta1)<1.5) && !haspixelseed2 && abs(eta2)<1.5";
-  TString cut = "pt1>40.0 && pt2>30.0 && isconverted2 && !haspixelseed1";
+
+  TString cut = "pt1>40.0 && pt2>30.0";
 
 
+  //plot from TTree named hHggNtuple
+  plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 100.,  200., 0., -1.,1,lumi,"hmass",cut,100);
 
- plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 0.,  10., 0., -1.,1,lumi,"eoverp2",cut,100);
-  //plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, -0.5,  2.5, 0., -1.,1,lumi,"isconverted1+isconverted2",cut,3);
-  //plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 0.,  5., 0., -1.,1,lumi,"abs(eta1-eta2)",cut,20);
-  //plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 0.,  100., 0., -1.,1,lumi,"hpt",cut,100);
-
- // plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 100.,  200., 0., -1.,1,lumi,"hmass",cut,100);
-
-
-//  plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 100.,  200., 0., -1.,1,lumi,"hmass",cut,100);
-  //plot("hHggNtuple","#Delta#eta",  0, -0.5,  2.5., 0., -1.,1,lumi,"isconverted1+isconverted2",cut,3);
-  //plot("hHggNtuple","#Delta#eta",  0, -1.0,  1.0., 0., -1.,1,lumi,"cosdbetaboost",cut,100);
-
-
-
-  return;
+  //plot from TH1D
   plot("h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
   return;
-
   plot("hPhotonEta1",     "photon #eta_{1}",             0, 0.,  0., 0., 50.,2,lumi);
   plot("hPhotonEta2",     "photon #eta_{2}",             0, 0.,  0., 0., 50.,2,lumi);
   plot("hPhotonPhi1",     "photon #phi_{1}",             0, 0.,  0., 0., 75.,4,lumi);
