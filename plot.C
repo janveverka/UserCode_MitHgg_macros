@@ -33,7 +33,7 @@ void plot()
 
 void plot(const char *name, const char* title, int logy,
 	  double xmin, double xmax, double ymin, double ymax,
-	  int nRebin, double lumi)
+	  int nRebin, double lumi, TString draw="", TString cut="", int nbins=100)
 {
   // use logarithmic scale?
   TCanvas *canvas = MitStyle::MakeCanvas("c","c");
@@ -61,6 +61,10 @@ void plot(const char *name, const char* title, int logy,
     plotTask->SetHistMaximum(ymax);
   // rebinning
   plotTask->SetNRebin     (nRebin);
+
+  plotTask->SetNBins(nbins);
+  plotTask->SetDrawExp(draw,cut);
+
   // set the titles
   plotTask->SetAxisTitles(title,"Number of Events");
   plotTask->PlotStack("",name);

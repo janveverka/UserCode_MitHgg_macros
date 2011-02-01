@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.1 2011/01/24 14:57:09 paus Exp $
+// $Id: runHgg.C,v 1.2 2011/01/29 23:17:03 paus Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -17,17 +17,18 @@
 #include "MitHgg/Mods/interface/ZmmAnalysis.h"
 #include "MitHgg/Mods/interface/ZeeAnalysis.h"
 #include "MitHgg/Mods/interface/HggAnalysis.h"
+#include "MitHgg/Mods/interface/HGGMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runHgg(const char *fileset    = "0000",
+void runHgg(const char *fileset    = "",
 	    const char *skim       = "noskim",
-	    const char *dataset    = "w10-zz-z2-v8-pu",
+	    const char *dataset    = "w10-h120gg-gf-v8-pu",
 	    //const char *dataset    = "r10b-pho-d22",
 	    const char *book       = "t2mit/filefi/017",
 	    const char *catalogDir = "/home/cmsprod/catalog",
 	    const char *outputName = "hgg",
-	    int         nEvents    = 1000)
+	    int         nEvents    = 1e6)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -41,6 +42,7 @@ void runHgg(const char *fileset    = "0000",
     printf(" JSON file was not properly defined. EXIT!\n");
     return;
   } 
+
   TString jsonFile = TString("/home/cmsprod/json/") + TString(json);
   Bool_t  isData   = ( (jsonFile.CompareTo("/home/cmsprod/json/~") != 0) );
 
@@ -71,15 +73,15 @@ void runHgg(const char *fileset    = "0000",
   RunLumiSelectionMod *runLumiSel = new RunLumiSelectionMod;
   runLumiSel->SetAcceptMC(kTRUE);                          // Monte Carlo events are always accepted
 
-  // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/cmsprod/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/cmsprod/json/-") != 0)   ) {
-    runLumiSel->AddJSONFile(jsonFile.Data());
-  }
-  if ((jsonFile.CompareTo("/home/cmsprod/json/-") == 0)   ) {
-    printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
-    runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
-  }
+//   // only select on run- and lumisection numbers when valid json file present
+//   if ((jsonFile.CompareTo("/home/cmsprod/json/~") != 0) &&
+//       (jsonFile.CompareTo("/home/cmsprod/json/-") != 0)   ) {
+//     runLumiSel->AddJSONFile(jsonFile.Data());
+//   }
+//   if ((jsonFile.CompareTo("/home/cmsprod/json/-") == 0)   ) {
+//     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
+//     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
+//   }
 
   printf("\n Run lumi worked. \n\n");
 
@@ -204,6 +206,7 @@ void runHgg(const char *fileset    = "0000",
   elecId->SetApplyD0Cut                (kTRUE);
   elecId->SetNExpectedHitsInnerCut     (0);
   PhotonIDMod         *photId = new PhotonIDMod;
+  photId->SetApplyPixelSeed(kFALSE);
 
   ElectronCleaningMod *elecCleaning = new ElectronCleaningMod;
   PhotonCleaningMod   *photCleaning = new PhotonCleaningMod;
@@ -248,6 +251,17 @@ void runHgg(const char *fileset    = "0000",
   else
     hggMod->SetIsData(kFALSE);
 
+  HGGMod *hggmod = new HGGMod;
+  hggmod->SetPhotonName(photId->GetOutputName());
+  if (jsonFile.CompareTo("/home/cmsprod/json/~") != 0)
+    hggmod->SetMatchMC(kFALSE);
+  else
+    hggmod->SetMatchMC(kTRUE);  
+  
+  //hggmod->SetPhotonName("Photons");
+  //hggmod->SetPhotonsFromBranch(kTRUE);
+  
+  
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
@@ -266,10 +280,11 @@ void runHgg(const char *fileset    = "0000",
   elecCleaning    ->Add(photCleaning);
   photCleaning    ->Add(mergeLeptonsMod);
   // lepton merging
-  mergeLeptonsMod ->Add(zmmMod);
+  //mergeLeptonsMod ->Add(zmmMod);
   // core analysis
-  zmmMod          ->Add(zeeMod);
-  zeeMod          ->Add(hggMod);
+  //zmmMod          ->Add(zeeMod);
+  photId          ->Add(hggMod);
+  photId          ->Add(hggmod);
 
   //------------------------------------------------------------------------------------------------
   // setup analysis
