@@ -88,6 +88,7 @@ void runHggCiC(const char *fileset    = "0000",
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v1");
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v2");
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v3");
+  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v4");
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v5");
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v6");
   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v7");
@@ -98,29 +99,17 @@ void runHggCiC(const char *fileset    = "0000",
     hltModP->SetAbortIfNotAccepted(kTRUE);
   else
     hltModP->SetAbortIfNotAccepted(kFALSE);
-  
-  //------------------------------------------------------------------------------------------------
-  // select events with a good primary vertex
-  //------------------------------------------------------------------------------------------------
-  GoodPVFilterMod *goodPVFilterMod = new GoodPVFilterMod;
-  goodPVFilterMod->SetMinVertexNTracks(0);
-  goodPVFilterMod->SetMinNDof         (5);
-  goodPVFilterMod->SetMaxAbsZ         (24.0);
-  goodPVFilterMod->SetMaxRho          (2.0);
-  goodPVFilterMod->SetVertexesName("DAPrimaryVertexes");
-  
+    
   PhotonCiCMod         *photId = new PhotonCiCMod;
-  photId->                SetApplySpikeRemoval(true);
+  photId->                SetApplySpikeRemoval(false);
   photId->                SetPtMin(30.);
   photId->                SetAbsEtaMax(2.5);
-
+  
   HggAnalysisMod *anaMod = new HggAnalysisMod;
   anaMod->SetTrigObjsName     (hltModP->GetOutputName());
   anaMod->SetPhotonName       (photId->GetOutputName());
   anaMod->SetPhotonsFromBranch(kFALSE);
   anaMod->SetOverlapCut(double(overlapCut));
-  anaMod->SetPVName(ModNames::gkGoodVertexesName);
-
 
   if (jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0)
     anaMod->SetIsData(kTRUE);
@@ -132,8 +121,7 @@ void runHggCiC(const char *fileset    = "0000",
   //------------------------------------------------------------------------------------------------
   // this is how it always starts
   runLumiSel      ->Add(hltModP);
-  hltModP         ->Add(goodPVFilterMod);
-  goodPVFilterMod ->Add(photId);
+  hltModP         ->Add(photId);
   photId          ->Add(anaMod);
   
   //------------------------------------------------------------------------------------------------
