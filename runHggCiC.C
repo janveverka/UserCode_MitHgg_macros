@@ -1,4 +1,4 @@
-// $Id: runHggAna.C,v 1.1 2011/06/08 14:27:54 fabstoec Exp $
+// $Id: runHggCiC.C,v 1.2 2011/06/27 12:33:29 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -10,9 +10,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/PhotonCiCMod.h"
-
 #include "MitHgg/Mods/interface/HggAnalysisMod.h"
-
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -62,17 +60,25 @@ void runHggCiC(const char *fileset    = "0000",
   gDebugMask  = Debug::kGeneral;
   gDebugLevel = 3;
 
+  printf("\n Initialization worked 2. \n\n");
+
   //------------------------------------------------------------------------------------------------
   // set up information
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSel = new RunLumiSelectionMod;
   runLumiSel->SetAcceptMC(kTRUE);                          // Monte Carlo events are always accepted
   
+
+  printf("\n Initialization worked 3. \n\n");
+
   // only select on run- and lumisection numbers when valid json file present
   if ((jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0) &&
       (jsonFile.CompareTo("/home/fabstoec/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
+
+  printf("\n Initialization worked 4. \n\n");
+
   if ((jsonFile.CompareTo("/home/cmsprod/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
@@ -80,19 +86,39 @@ void runHggCiC(const char *fileset    = "0000",
 
   printf("\n Run lumi worked. \n\n");
 
+  printf("\n Initialization worked 5. \n\n");
+
   //------------------------------------------------------------------------------------------------
   // HLT information
   //------------------------------------------------------------------------------------------------
 
   HLTMod *hltModP = new HLTMod("HLTModP");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v1");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v2");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v3");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v4");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v5");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v6");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v7");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v8");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v1");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v2");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v3");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v4");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v5");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v6");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v7");
+//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v8");
+
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v1");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v3");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v4");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v5");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v6");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v7");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v8");
+
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v1");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v2");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v3");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v4");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v5");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v6");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v7");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v8");
 
   hltModP->SetTrigObjsName("MyHltPhotObjs");
   if (isData)
