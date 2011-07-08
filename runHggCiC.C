@@ -1,4 +1,5 @@
-// $Id: runHggCiC.C,v 1.2 2011/06/27 12:33:29 fabstoec Exp $
+
+// $Id: runHggCiC.C,v 1.3 2011/06/28 19:25:24 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -51,8 +52,6 @@ void runHggCiC(const char *fileset    = "0000",
     return;
   } 
   
-  printf("\n Initialization worked. \n\n");
-  
   //------------------------------------------------------------------------------------------------
   // some global setups
   //------------------------------------------------------------------------------------------------
@@ -60,16 +59,11 @@ void runHggCiC(const char *fileset    = "0000",
   gDebugMask  = Debug::kGeneral;
   gDebugLevel = 3;
 
-  printf("\n Initialization worked 2. \n\n");
-
   //------------------------------------------------------------------------------------------------
   // set up information
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSel = new RunLumiSelectionMod;
   runLumiSel->SetAcceptMC(kTRUE);                          // Monte Carlo events are always accepted
-  
-
-  printf("\n Initialization worked 3. \n\n");
 
   // only select on run- and lumisection numbers when valid json file present
   if ((jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0) &&
@@ -77,31 +71,26 @@ void runHggCiC(const char *fileset    = "0000",
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
 
-  printf("\n Initialization worked 4. \n\n");
-
   if ((jsonFile.CompareTo("/home/cmsprod/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
 
-  printf("\n Run lumi worked. \n\n");
-
-  printf("\n Initialization worked 5. \n\n");
-
   //------------------------------------------------------------------------------------------------
   // HLT information
   //------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------
+  // select events with a good primary vertex
+  //------------------------------------------------------------------------------------------------
+  GoodPVFilterMod *goodPVFilterMod = new GoodPVFilterMod;
+  goodPVFilterMod->SetMinVertexNTracks(0);
+  goodPVFilterMod->SetMinNDof         (5);
+  goodPVFilterMod->SetMaxAbsZ         (24.0);
+  goodPVFilterMod->SetMaxRho          (2.0);
+  goodPVFilterMod->SetIsMC(!isData);
+
 
   HLTMod *hltModP = new HLTMod("HLTModP");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v1");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v2");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v3");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v4");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v5");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v6");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v7");
-//   hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v8");
-
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v1");
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v3");
@@ -121,26 +110,36 @@ void runHggCiC(const char *fileset    = "0000",
   hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v8");
 
   hltModP->SetTrigObjsName("MyHltPhotObjs");
-  if (isData)
-    hltModP->SetAbortIfNotAccepted(kTRUE);
-  else
-    hltModP->SetAbortIfNotAccepted(kFALSE);
+  hltModP->SetAbortIfNotAccepted(isData);
     
-  PhotonCiCMod         *photId = new PhotonCiCMod;
-  photId->                SetApplySpikeRemoval(false);
-  photId->                SetPtMin(30.);
-  photId->                SetAbsEtaMax(2.5);
-  
+  PhotonCiCMod *photId = new PhotonCiCMod;
+  photId->     SetIsData(isData);
+  photId->     SetApplySpikeRemoval(false);
+  photId->     SetMCSmearFactors(0.0141, 0.0200,    // EB high/low R9
+			 	 0.0474, 0.0361);   // EE high/low R9
+
+  photId->     AddEnCorrPerRun  (160404, 163869,    // Run Range
+				 -0.0047,  0.0025,  // EB high/low R9
+				  0.0058, -0.0010); // EE high/low R9
+  photId->     AddEnCorrPerRun  (165071, 165970,    // Run Range
+				 -0.0007,  0.0049,  // EB high/low R9
+				  0.0249,  0.0062); // EE high/low R9
+  photId->     AddEnCorrPerRun  (165971, 166502,    // Run Range
+				  0.0003,  0.0067,  // EB high/low R9
+				  0.0376,  0.0133); // EE high/low R9
+  photId->     AddEnCorrPerRun  (166503, 166861,    // Run Range
+				  0.0011,  0.0063,  // EB high/low R9
+				  0.0450,  0.0178); // EE high/low R9
+  photId->     AddEnCorrPerRun  (166862, 999999,    // Run Range
+				  0.0014,  0.0074,  // EB high/low R9
+				  0.0561,  0.0273); // EE high/low R9
+
   HggAnalysisMod *anaMod = new HggAnalysisMod;
   anaMod->SetTrigObjsName     (hltModP->GetOutputName());
   anaMod->SetPhotonName       (photId->GetOutputName());
   anaMod->SetPhotonsFromBranch(kFALSE);
+  anaMod->SetIsData           (isData);
   anaMod->SetOverlapCut(double(overlapCut));
-
-  if (jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0)
-    anaMod->SetIsData(kTRUE);
-  else
-    anaMod->SetIsData(kFALSE);
 
   //------------------------------------------------------------------------------------------------
   // making analysis chain
@@ -150,6 +149,8 @@ void runHggCiC(const char *fileset    = "0000",
   hltModP         ->Add(photId);
   photId          ->Add(anaMod);
   
+  runLumiSel      ->Add(goodPVFilterMod);
+
   //------------------------------------------------------------------------------------------------
   // setup analysis
   //------------------------------------------------------------------------------------------------
