@@ -1,4 +1,4 @@
-// $Id: runPhIso.C,v 1.4 2011/02/01 16:51:37 bendavid Exp $
+// $Id: runHggAna.C,v 1.1 2011/06/08 14:27:54 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -10,7 +10,9 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
+#include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 #include "MitHgg/Mods/interface/HggAnalysisMod.h"
+#include "MitPhysics/Utils/interface/VertexTools.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -83,20 +85,27 @@ void runHggAna(const char *fileset    = "0000",
   //------------------------------------------------------------------------------------------------
 
   HLTMod *hltModP = new HLTMod("HLTModP");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v1");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v2");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v3");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v5");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v6");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v7");
-  hltModP->AddTrigger("HLT_Photon26_IsoVL_Photon18_v8");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v1");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v3");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v4");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v5");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v6");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v7");
+  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v8");
+
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v1");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v2");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v3");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v4");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v5");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v6");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v7");
+  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v8");
 
   hltModP->SetTrigObjsName("MyHltPhotObjs");
-  if (isData)
-    hltModP->SetAbortIfNotAccepted(kTRUE);
-  else
-    hltModP->SetAbortIfNotAccepted(kFALSE);
-  
+  hltModP->SetAbortIfNotAccepted(isData);
+
   //------------------------------------------------------------------------------------------------
   // select events with a good primary vertex
   //------------------------------------------------------------------------------------------------
@@ -105,42 +114,102 @@ void runHggAna(const char *fileset    = "0000",
   goodPVFilterMod->SetMinNDof         (5);
   goodPVFilterMod->SetMaxAbsZ         (24.0);
   goodPVFilterMod->SetMaxRho          (2.0);
-  goodPVFilterMod->SetVertexesName("DAPrimaryVertexes");
+  goodPVFilterMod->SetIsMC(!isData);
   
   PhotonIDMod         *photId = new PhotonIDMod;
   photId->                SetIsoType("MITPUCorrected");
-  photId->                SetApplySpikeRemoval(true);
+  photId->                SetApplySpikeRemoval(false);
   photId->                SetApplyPixelSeed(false);
   photId->                SetApplyElectronVetoConvRecovery(true);
   photId->                SetApplyConversionId(true);
   photId->                SetHadOverEmMax(0.02);
-  photId->                SetPtMin(30.);
+  photId->                SetPtMin(20.);
   photId->                SetEtaWidthEB(0.010);
   photId->                SetEtaWidthEE(0.028);
   photId->                SetAbsEtaMax(2.5);
   photId->                SetApplyR9Min(false);  
 
-  HggAnalysisMod *anaMod = new HggAnalysisMod;
-  anaMod->SetTrigObjsName     (hltModP->GetOutputName());
-  anaMod->SetPhotonName       (photId->GetOutputName());
-  anaMod->SetPhotonsFromBranch(kFALSE);
-  anaMod->SetOverlapCut(double(overlapCut));
-  anaMod->SetPVName(ModNames::gkGoodVertexesName);
+  // Pair Selectro for CiC Analysis
+  PhotonPairSelector *photIdCiC = new PhotonPairSelector;
+  photIdCiC->     SetIsData(isData);
+  photIdCiC->     SetMCSmearFactors(0.0141, 0.0200,    // EB high/low R9
+			 	 0.0474, 0.0361);   // EE high/low R9
 
-  if (jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0)
-    anaMod->SetIsData(kTRUE);
-  else
-    anaMod->SetIsData(kFALSE);
+  photIdCiC->     AddEnCorrPerRun  (160404, 163869,    // Run Range
+				 -0.0047,  0.0025,  // EB high/low R9
+				  0.0058, -0.0010); // EE high/low R9
+  photIdCiC->     AddEnCorrPerRun  (165071, 165970,    // Run Range
+				 -0.0007,  0.0049,  // EB high/low R9
+				  0.0249,  0.0062); // EE high/low R9
+  photIdCiC->     AddEnCorrPerRun  (165971, 166502,    // Run Range
+				  0.0003,  0.0067,  // EB high/low R9
+				  0.0376,  0.0133); // EE high/low R9
+  photIdCiC->     AddEnCorrPerRun  (166503, 166861,    // Run Range
+				  0.0011,  0.0063,  // EB high/low R9
+				  0.0450,  0.0178); // EE high/low R9
+  photIdCiC->     AddEnCorrPerRun  (166862, 999999,    // Run Range
+				  0.0014,  0.0074,  // EB high/low R9
+				  0.0561,  0.0273); // EE high/low R9
+  photIdCiC->     SetPhotonSelType("CiCSelection");
+  photIdCiC->     SetVertexSelType("CiCSelection");
+  photIdCiC->     SetOutputName("CiCPhotons");
 
+  VertexTools* vtool = VertexTools::instance(gSystem->Getenv("CMSSW_BASE"));
+
+  // copy the Mod for the MIT selection
+  PhotonPairSelector *photIdMIT = new PhotonPairSelector;
+  photIdMIT->     SetIsData(isData);
+  photIdMIT->     SetMCSmearFactors(0.0141, 0.0200,    // EB high/low R9
+			 	 0.0474, 0.0361);   // EE high/low R9
+
+  photIdMIT->     AddEnCorrPerRun  (160404, 163869,    // Run Range
+				 -0.0047,  0.0025,  // EB high/low R9
+				  0.0058, -0.0010); // EE high/low R9
+  photIdMIT->     AddEnCorrPerRun  (165071, 165970,    // Run Range
+				 -0.0007,  0.0049,  // EB high/low R9
+				  0.0249,  0.0062); // EE high/low R9
+  photIdMIT->     AddEnCorrPerRun  (165971, 166502,    // Run Range
+				  0.0003,  0.0067,  // EB high/low R9
+				  0.0376,  0.0133); // EE high/low R9
+  photIdMIT->     AddEnCorrPerRun  (166503, 166861,    // Run Range
+				  0.0011,  0.0063,  // EB high/low R9
+				  0.0450,  0.0178); // EE high/low R9
+  photIdMIT->     AddEnCorrPerRun  (166862, 999999,    // Run Range
+				  0.0014,  0.0074,  // EB high/low R9
+				  0.0561,  0.0273); // EE high/low R9
+  photIdMIT->     SetPhotonSelType("MITSelection");
+  photIdMIT->     SetVertexSelType("StdSelection");
+  photIdMIT->     SetInputPhotonsName(photId->GetOutputName());
+  photIdMIT->     SetPhotonsFromBranch(false);
+  photIdMIT->     SetOutputName("MITPhotons");
+  photIdMIT->     SetPVName(goodPVFilterMod->GetOutputName());
+  photIdMIT->     SetPVFromBranch(false);
+
+  // Two analysis Modules
+  HggAnalysisMod *anaModCiC = new HggAnalysisMod;
+  anaModCiC->SetPhotonName       (photIdCiC->GetOutputName());
+  anaModCiC->SetPhotonsFromBranch(kFALSE);
+
+  HggAnalysisMod *anaModMIT = new HggAnalysisMod;
+  anaModMIT->SetPhotonName       (photIdMIT->GetOutputName());
+  anaModMIT->SetPhotonsFromBranch(kFALSE);
+  
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
   // this is how it always starts
   runLumiSel      ->Add(hltModP);
+
+  // the MIT flow...
   hltModP         ->Add(goodPVFilterMod);
   goodPVFilterMod ->Add(photId);
-  photId          ->Add(anaMod);
-  
+  photId          ->Add(photIdMIT);
+  photIdMIT       ->Add(anaModMIT);
+
+  // the CiC flow...
+  hltModP         ->Add(photIdCiC);
+  photIdCiC       ->Add(anaModCiC);    
+
   //------------------------------------------------------------------------------------------------
   // setup analysis
   //------------------------------------------------------------------------------------------------
@@ -163,9 +232,6 @@ void runHggAna(const char *fileset    = "0000",
   else 
     d = c->FindDataset(book,skimdataset.Data(),fileset);
   ana->AddDataset(d);
-  //ana->AddFile("root://castorcms//castor/cern.ch/user/p/paus/filler/011/s09-ttbar-7-mc3/*.root");
-  //ana->AddFile("zee-skim_r10a-eg-pr-v4_noskim_0000_000.root");
-  //ana->AddFile("zee-skim_p10-h110gg-gf-v26_noskim_0000_000.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output
