@@ -1,4 +1,4 @@
-// $Id: runHggAna.C,v 1.2 2011/07/08 17:55:21 fabstoec Exp $
+// $Id: runHggAna.C,v 1.3 2011/07/15 17:26:34 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -154,6 +154,7 @@ void runHggAna(const char *fileset    = "0000",
   photIdCiC->     SetPhotonSelType("CiCSelection");
   photIdCiC->     SetVertexSelType("CiCSelection");
   photIdCiC->     SetOutputName("CiCPhotons");
+  photIdCiC->     SetTupleName("CiCtuple");
 
   VertexTools* vtool = VertexTools::instance(gSystem->Getenv("CMSSW_BASE"));
 
@@ -186,6 +187,7 @@ void runHggAna(const char *fileset    = "0000",
   photIdMIT->     SetOutputName("MITPhotons");
   photIdMIT->     SetPVName(goodPVFilterMod->GetOutputName());
   photIdMIT->     SetPVFromBranch(false);
+  photIdMIT->     SetTupleName("MITtuple");
 
   // Two analysis Modules
   HggAnalysisMod *anaModCiC = new HggAnalysisMod;
@@ -203,10 +205,10 @@ void runHggAna(const char *fileset    = "0000",
   runLumiSel      ->Add(hltModP);
 
   // the MIT flow...
-//   hltModP         ->Add(goodPVFilterMod);
-//   goodPVFilterMod ->Add(photId);
-//   photId          ->Add(photIdMIT);
-//   photIdMIT       ->Add(anaModMIT);
+  hltModP         ->Add(goodPVFilterMod);
+  goodPVFilterMod ->Add(photId);
+  photId          ->Add(photIdMIT);
+  photIdMIT       ->Add(anaModMIT);
 
   // the CiC flow...
   hltModP         ->Add(photIdCiC);
