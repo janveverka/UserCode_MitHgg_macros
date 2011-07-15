@@ -11,19 +11,19 @@
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/PhotonPairSelector.h"
-#include "MitHgg/Mods/interface/HggAnalysisMod.h"
-#include "MitPhysics/Utils/interface/VertexTools.h"
+#include "MitHgg/Mods/interface/PhotonIsoAreaMod.h"
+#include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runHggAna(const char *fileset    = "0000",
-	       const char *skim       = "noskim",
-	       const char *dataset    = "w10-zz-z2-v8-pu",
-	       //const char *dataset    = "r10b-pho-d22",
-	       const char *book       = "t2mit/filefi/017",
-	       const char *catalogDir = "/home/cmsprod/catalog",
-	       const char *outputName = "hgg",
-	       int         nEvents    = 1000)
+void runPhIsoArea(const char *fileset    = "0000",
+		  const char *skim       = "noskim",
+		  const char *dataset    = "w10-zz-z2-v8-pu",
+		  //const char *dataset    = "r10b-pho-d22",
+		  const char *book       = "t2mit/filefi/017",
+		  const char *catalogDir = "/home/cmsprod/catalog",
+		  const char *outputName = "hgg",
+		  int         nEvents    = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -83,28 +83,17 @@ void runHggAna(const char *fileset    = "0000",
   //------------------------------------------------------------------------------------------------
   // HLT information
   //------------------------------------------------------------------------------------------------
-
-  HLTMod *hltModP = new HLTMod("HLTModP");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v1");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v3");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v4");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v5");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v6");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v7");
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v8");
-
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v1");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v2");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v3");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v4");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v5");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v6");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v7");
-  hltModP->AddTrigger("HLT_Photon20_R9Id_Photon18_R9Id_v8");
-
-  hltModP->SetTrigObjsName("MyHltPhotObjs");
-  hltModP->SetAbortIfNotAccepted(isData);
+  HLTMod *hltModEle = new HLTMod("HltModEle");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v1");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v2");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v3");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v4");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v5");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v6");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v7");
+  hltModEle->AddTrigger("HLT_Ele32_CaloIdL_CaloIsoVL_SC17_v8");
+  hltModEle->SetTrigObjsName("MyHltPhotObjsEle");
+  hltModEle->SetAbortIfNotAccepted(isData);
 
   //------------------------------------------------------------------------------------------------
   // select events with a good primary vertex
@@ -116,101 +105,54 @@ void runHggAna(const char *fileset    = "0000",
   goodPVFilterMod->SetMaxRho          (2.0);
   goodPVFilterMod->SetIsMC(!isData);
   
+  // our MIT Photons ID...
   PhotonIDMod         *photId = new PhotonIDMod;
-  photId->                SetIsoType("MITPUCorrected");
+  //photId->                SetIsoType("MITPUCorrected");
+  photId->                SetIsoType("NoIso");   // do no isolation, since we want to check for this...
   photId->                SetApplySpikeRemoval(false);
   photId->                SetApplyPixelSeed(false);
-  photId->                SetApplyElectronVetoConvRecovery(true);
-  photId->                SetApplyConversionId(true);
-  photId->                SetHadOverEmMax(0.02);
+  photId->                SetApplyElectronVetoConvRecovery(false); // no conversion, we look at electrons
+  photId->                SetApplyConversionId(false);
+  photId->                SetHadOverEmMax(0.05);
   photId->                SetPtMin(20.);
   photId->                SetEtaWidthEB(0.010);
   photId->                SetEtaWidthEE(0.028);
   photId->                SetAbsEtaMax(2.5);
   photId->                SetApplyR9Min(false);  
 
-  // Pair Selectro for CiC Analysis
-  PhotonPairSelector *photIdCiC = new PhotonPairSelector;
-  photIdCiC->     SetIsData(isData);
+  // some default VBTF Electron ID
+  ElectronIDMod *elecId = new ElectronIDMod;
+  elecId->SetIDType                    ("VBTFWorkingPoint80Id");
+  elecId->SetIsoType                   ("TrackJuraSliding");
+  elecId->SetApplyConversionFilterType1(kFALSE);
+  elecId->SetApplyConversionFilterType2(kTRUE);
+  elecId->SetChargeFilter              (kFALSE);
+  elecId->SetApplyD0Cut                (kTRUE);
+  elecId->SetNExpectedHitsInnerCut     (0);
+  elecId->SetVertexName                (goodPVFilterMod->GetOutputName());
 
-  photIdCiC->     SetMCSmearFactors(0.0092, 0.0170,    // EB high/low R9
-			 	 0.0292, 0.0289);   // EE high/low R9
+  PhotonIsoAreaMod *phIsoMod = new PhotonIsoAreaMod;
+  phIsoMod->     SetIsData(isData);
+  phIsoMod->     SetInputPhotonsName(photId->GetOutputName());
+  phIsoMod->     SetPhotonsFromBranch(false);
+  phIsoMod->     SetPVName(goodPVFilterMod->GetOutputName());
+  phIsoMod->     SetPVFromBranch(false);
+  phIsoMod->     SetElectronName(elecId->GetOutputName());
+  phIsoMod->     SetEleFromBranch(false);
 
-  photIdCiC->     AddEnCorrPerRun  (160404, 163869,    // Run Range
-				 -0.0047,  0.0025,  // EB high/low R9
-				  0.0058, -0.0010); // EE high/low R9
-  photIdCiC->     AddEnCorrPerRun  (165071, 165970,    // Run Range
-				 -0.0007,  0.0049,  // EB high/low R9
-				  0.0249,  0.0062); // EE high/low R9
-  photIdCiC->     AddEnCorrPerRun  (165971, 166502,    // Run Range
-				  0.0003,  0.0067,  // EB high/low R9
-				  0.0376,  0.0133); // EE high/low R9
-  photIdCiC->     AddEnCorrPerRun  (166503, 166861,    // Run Range
-				  0.0011,  0.0063,  // EB high/low R9
-				  0.0450,  0.0178); // EE high/low R9
-  photIdCiC->     AddEnCorrPerRun  (166862, 999999,    // Run Range
-				  0.0014,  0.0074,  // EB high/low R9
-				  0.0561,  0.0273); // EE high/low R9
-  photIdCiC->     SetPhotonSelType("CiCSelection");
-  photIdCiC->     SetVertexSelType("CiCSelection");
-  photIdCiC->     SetOutputName("CiCPhotons");
-
-  VertexTools* vtool = VertexTools::instance(gSystem->Getenv("CMSSW_BASE"));
-
-  // copy the Mod for the MIT selection
-  PhotonPairSelector *photIdMIT = new PhotonPairSelector;
-  photIdMIT->     SetIsData(isData);
-
-  photIdMIT->     SetMCSmearFactors(0.0092, 0.0170,    // EB high/low R9
-			 	 0.0292, 0.0289);   // EE high/low R9
-
-  photIdMIT->     AddEnCorrPerRun  (160404, 163869,    // Run Range
-				 -0.0047,  0.0025,  // EB high/low R9
-				  0.0058, -0.0010); // EE high/low R9
-  photIdMIT->     AddEnCorrPerRun  (165071, 165970,    // Run Range
-				 -0.0007,  0.0049,  // EB high/low R9
-				  0.0249,  0.0062); // EE high/low R9
-  photIdMIT->     AddEnCorrPerRun  (165971, 166502,    // Run Range
-				  0.0003,  0.0067,  // EB high/low R9
-				  0.0376,  0.0133); // EE high/low R9
-  photIdMIT->     AddEnCorrPerRun  (166503, 166861,    // Run Range
-				  0.0011,  0.0063,  // EB high/low R9
-				  0.0450,  0.0178); // EE high/low R9
-  photIdMIT->     AddEnCorrPerRun  (166862, 999999,    // Run Range
-				  0.0014,  0.0074,  // EB high/low R9
-				  0.0561,  0.0273); // EE high/low R9
-  photIdMIT->     SetPhotonSelType("MITSelection");
-  photIdMIT->     SetVertexSelType("StdSelection");
-  photIdMIT->     SetInputPhotonsName(photId->GetOutputName());
-  photIdMIT->     SetPhotonsFromBranch(false);
-  photIdMIT->     SetOutputName("MITPhotons");
-  photIdMIT->     SetPVName(goodPVFilterMod->GetOutputName());
-  photIdMIT->     SetPVFromBranch(false);
-
-  // Two analysis Modules
-  HggAnalysisMod *anaModCiC = new HggAnalysisMod;
-  anaModCiC->SetPhotonName       (photIdCiC->GetOutputName());
-  anaModCiC->SetPhotonsFromBranch(kFALSE);
-
-  HggAnalysisMod *anaModMIT = new HggAnalysisMod;
-  anaModMIT->SetPhotonName       (photIdMIT->GetOutputName());
-  anaModMIT->SetPhotonsFromBranch(kFALSE);
-  
+  phIsoMod->     SetTriggerLegs("hltEle32CaloIdLCaloIsoVLSC17PixelMatchFilter","hltEle32CaloIdLCaloIsoVLSC17HEDoubleFilter");
+  phIsoMod->     SetTrigObjsName(hltModEle->GetOutputName());
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
   // this is how it always starts
-  runLumiSel      ->Add(hltModP);
+  runLumiSel      ->Add(hltModEle);
 
   // the MIT flow...
-//   hltModP         ->Add(goodPVFilterMod);
-//   goodPVFilterMod ->Add(photId);
-//   photId          ->Add(photIdMIT);
-//   photIdMIT       ->Add(anaModMIT);
-
-  // the CiC flow...
-  hltModP         ->Add(photIdCiC);
-  photIdCiC       ->Add(anaModCiC);    
+  hltModEle         ->Add(goodPVFilterMod);
+  goodPVFilterMod   ->Add(photId);
+  photId            ->Add(elecId);
+  elecId            ->Add(phIsoMod);
 
   //------------------------------------------------------------------------------------------------
   // setup analysis

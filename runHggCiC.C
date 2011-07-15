@@ -1,5 +1,5 @@
 
-// $Id: runHggCiC.C,v 1.3 2011/06/28 19:25:24 fabstoec Exp $
+// $Id: runHggCiC.C,v 1.4 2011/07/08 09:30:06 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -115,8 +115,9 @@ void runHggCiC(const char *fileset    = "0000",
   PhotonCiCMod *photId = new PhotonCiCMod;
   photId->     SetIsData(isData);
   photId->     SetApplySpikeRemoval(false);
-  photId->     SetMCSmearFactors(0.0141, 0.0200,    // EB high/low R9
-			 	 0.0474, 0.0361);   // EE high/low R9
+
+  photId->     SetMCSmearFactors(0.0092, 0.0170,    // EB high/low R9
+			 	 0.0292, 0.0289);   // EE high/low R9
 
   photId->     AddEnCorrPerRun  (160404, 163869,    // Run Range
 				 -0.0047,  0.0025,  // EB high/low R9
@@ -135,11 +136,8 @@ void runHggCiC(const char *fileset    = "0000",
 				  0.0561,  0.0273); // EE high/low R9
 
   HggAnalysisMod *anaMod = new HggAnalysisMod;
-  anaMod->SetTrigObjsName     (hltModP->GetOutputName());
   anaMod->SetPhotonName       (photId->GetOutputName());
   anaMod->SetPhotonsFromBranch(kFALSE);
-  anaMod->SetIsData           (isData);
-  anaMod->SetOverlapCut(double(overlapCut));
 
   //------------------------------------------------------------------------------------------------
   // making analysis chain
