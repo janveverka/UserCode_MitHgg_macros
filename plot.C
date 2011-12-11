@@ -31,12 +31,13 @@ void plot()
   printf("\n Hey Higgs to Gamma Gamma folks.\n\n   Welcome to the plot package.\n\n");
 }
 
-void plot(const char *name, const char* title, int logy,
+TCanvas *plot(const char *name, const char *filename, const char* title, int logy,
 	  double xmin, double xmax, double ymin, double ymax,
-	  int nRebin, double lumi, TString draw="", TString cut="", int nbins=100)
+	  int nRebin, double lumi, TString draw="", TString cut="", int nbins=100, const TH1D *putarget=0, bool stack = kTRUE)
 {
   // use logarithmic scale?
-  TCanvas *canvas = MitStyle::MakeCanvas("c","c");
+  //TCanvas *canvas = MitStyle::MakeCanvas("c","c");
+  TCanvas *canvas = new TCanvas;
   canvas->SetLogy(logy);
   // read all environment variables
   TString home   = getEnv("HOME");
@@ -50,6 +51,7 @@ void plot(const char *name, const char* title, int logy,
   samples->ReadFile((mitHgg + TString("/config")).Data());
   // plot what we want
   PlotTask   *plotTask = new PlotTask(samples,lumi);
+  plotTask->SetPuTarget(putarget);
   // adjust ranges if needed
   if (xmin!=0)
     plotTask->SetHistXMinimum(xmin);
@@ -67,14 +69,22 @@ void plot(const char *name, const char* title, int logy,
 
   // set the titles
   plotTask->SetAxisTitles(title,"Number of Events");
-  plotTask->PlotStack("",name);
-  // make a png file
-  if (logy == 1)
-    canvas->SaveAs((TString("png/")+TString(name)+TString("_log.png")).Data());
-  else
-    canvas->SaveAs((TString("png/")+TString(name)+TString("_lin.png")).Data());
 
-  return;
+  if (stack)
+    plotTask->PlotStack("",name);
+  else
+    plotTask->PlotContributions("",name);
+  
+  //gSystem->cd("/scratch/bendavid/root/");
+  // make a png file
+//   if (logy == 1)
+//     canvas->SaveAs((TString(title)+TString("_log.eps")).Data());
+//   else
+//     canvas->SaveAs((TString(title)+TString("_lin.eps")).Data());
+
+  canvas->SaveAs((TString(filename)+TString(".eps")).Data());
+
+  return canvas;
 }
 
 TString getEnv(const char* name)
