@@ -27,22 +27,25 @@ void plot(const char *name, const char* title, int logy,
           int nRebin, double lumi, TString draw="", TString cut="", int nbins=100);
 
 //==================================================================================================
-void plotsHgg(double lumi = 3000.)
+void plotsHgg(double lumi = 4500.0)
 {
   // setup graphics stuff before starting
   MitStyle::Init();
-  gROOT->Macro("$CMSSW_BASE/src/MitHgg/macros/plot.C+");
+  gROOT->LoadMacro("$CMSSW_BASE/src/MitHgg/macros/plot.C+");
 
+  // plot from TTree named hHggNtuple
+  TString nTuple = "MvaTuple";
+  TString cut    = "pfmet > 0 && ph1.pt > 30 && ph2.pt > 20";
 
-  TString cut = "pt1>40.0 && pt2>30.0";
+  printf("\n Plotting from tuple:  > %s <  with cuts: > %s \n\n",nTuple.Data(),cut.Data());
 
+  plot(nTuple.Data(),"di-photon mass [GeV/c^{2}]",0, 80.,220., 0., -1.,1,lumi,"mass",cut,140);
 
-  //plot from TTree named hHggNtuple
-  plot("hHggNtuple","di-photon mass [GeV/c^{2}]",  0, 100.,  200., 0., -1.,1,lumi,"hmass",cut,100);
+  // plot from TH1D
+  //plot("hNVtx","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,1,lumi);
 
-  //plot from TH1D
-  plot("h2TrigPhotonMass","di-photon mass [GeV/c^{2}]",  0, 0.,  0., 0., -1.,8,lumi);
   return;
+
   plot("hPhotonEta1",     "photon #eta_{1}",             0, 0.,  0., 0., 50.,2,lumi);
   plot("hPhotonEta2",     "photon #eta_{2}",             0, 0.,  0., 0., 50.,2,lumi);
   plot("hPhotonPhi1",     "photon #phi_{1}",             0, 0.,  0., 0., 75.,4,lumi);

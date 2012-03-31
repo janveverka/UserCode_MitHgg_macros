@@ -28,27 +28,33 @@ TString getEnv(const char* name);
 //==================================================================================================
 void plot()
 {
-  printf("\n Hey Higgs to Gamma Gamma folks.\n\n   Welcome to the plot package.\n\n");
+  printf("\n Hey Higgs to Gamma Gamma folks: WELCOME TO THE PLOT PACKAGE ! \n\n");
+  return;
 }
 
 TCanvas *plot(const char *name, const char *filename, const char* title, int logy,
-	  double xmin, double xmax, double ymin, double ymax,
-	  int nRebin, double lumi, TString draw="", TString cut="", int nbins=100, const TH1D *putarget=0, bool stack = kTRUE)
+	      double xmin, double xmax, double ymin, double ymax,
+	      int nRebin, double lumi, TString draw="", TString cut="", int nbins=100,
+	      const TH1D *putarget=0, bool stack = kTRUE)
 {
+
   // use logarithmic scale?
   //TCanvas *canvas = MitStyle::MakeCanvas("c","c");
   TCanvas *canvas = new TCanvas;
   canvas->SetLogy(logy);
+
   // read all environment variables
   TString home   = getEnv("HOME");
   TString mitHgg = getEnv("MIT_HGG_DIR");
-  TString hstDir = getEnv("MIT_HIST_DIR");
+  TString hstDir = getEnv("MIT_ANA_HIST");
   TString anaCfg = getEnv("MIT_ANA_CFG");
   TString prdCfg = getEnv("MIT_PROD_CFG");
-  // now define sample
+
+  // define sample
   TaskSamples* samples = new TaskSamples(prdCfg.Data(),hstDir.Data());
   samples->SetNameTxt(anaCfg.Data());
   samples->ReadFile((mitHgg + TString("/config")).Data());
+
   // plot what we want
   PlotTask   *plotTask = new PlotTask(samples,lumi);
   plotTask->SetPuTarget(putarget);
@@ -74,13 +80,6 @@ TCanvas *plot(const char *name, const char *filename, const char* title, int log
     plotTask->PlotStack("",name);
   else
     plotTask->PlotContributions("",name);
-  
-  //gSystem->cd("/scratch/bendavid/root/");
-  // make a png file
-//   if (logy == 1)
-//     canvas->SaveAs((TString(title)+TString("_log.eps")).Data());
-//   else
-//     canvas->SaveAs((TString(title)+TString("_lin.eps")).Data());
 
   canvas->SaveAs((TString(filename)+TString(".eps")).Data());
 
@@ -95,32 +94,3 @@ TString getEnv(const char* name)
   } 
   return TString(gSystem->Getenv(name));  
 }
-  //  // adjust the default plot styles to our liking
-  //  HistStyles *styles   = new HistStyles();
-  //  HistStyle  *s        = 0;
-  //  // start with a clean slate
-  //  styles->Clear();
-  //  // add the default Monte Carlo styles
-  //  s = styles->AddStyle();
-  //  s->SetColor      (kBlack);
-  //  s->SetFillStyle  (0);
-  //  s = styles->AddStyle();
-  //  s->SetColor      (kMagenta);
-  //  s->SetFillStyle  (3001);
-  //  s = styles->AddStyle();
-  //  s->SetColor      (kRed);
-  //  s->SetFillStyle  (3004);
-  //  s = styles->AddStyle();
-  //  s->SetColor      (kYellow);
-  //  s->SetFillStyle  (3007);
-  //  s = styles->AddStyle();
-  //  s->SetColor      (kCyan);
-  //  s->SetFillStyle  (3010);
-  //  // add the default data style
-  //  s = styles->SetDataStyle();
-  //  s->SetColor      (kBlue);
-  //  s->SetFillStyle  (0);
-  //  s->SetMarkerStyle(20);
-  //  s->SetMarkerSize (1.0);
-  //  // set the new styles as the current styles
-  //  plotTask->SetHistStyles(styles);
