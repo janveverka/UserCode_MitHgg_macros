@@ -299,10 +299,10 @@ void applyTMVA_Bambu_MIT() {
   
   
   //lumi weights for mh=125 GeV, normalize to theLumi
-  double w_signal_1 = theLumi*15.31*2.229/1000./hNE_signal_1->GetBinContent(1);
-  double w_signal_2 = theLumi*1.211*2.229/1000./hNE_signal_2->GetBinContent(1);
-  double w_signal_3 = theLumi*(0.5729+0.3158)*2.229/1000./hNE_signal_3->GetBinContent(1);
-  double w_signal_4 = theLumi*0.08634*2.229/1000./hNE_signal_4->GetBinContent(1);
+  double w_signal_1 = theLumi*15.31*2.29/1000./hNE_signal_1->GetBinContent(1);
+  double w_signal_2 = theLumi*1.211*2.29/1000./hNE_signal_2->GetBinContent(1);
+  double w_signal_3 = theLumi*(0.5729+0.3158)*2.29/1000./hNE_signal_3->GetBinContent(1);
+  double w_signal_4 = theLumi*0.08634*2.29/1000./hNE_signal_4->GetBinContent(1);
 
   // FP numbers!
   bool doFP = false;
