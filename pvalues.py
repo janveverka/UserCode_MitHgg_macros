@@ -13,7 +13,16 @@ cmdlist=[]
 
 for i in range(nm):
   mass = mmin + i*(mmax-mmin)/float(nm-1)
+  
+  #observed
   obsexec = "combine -d %s -m %g -M ProfileLikelihood --significance --pvalue -n SigFromGridObs" % (card,mass)
+  
+  #expected SM over mass range
+  #obsexec = "combine -d %s -m %g -M ProfileLikelihood --significance --pvalue -t -1 --expectSignal=1 -n SigFromGridObs" % (card,mass)
+
+  #expected SM for 125GeV
+  #obsexec = "combine -d %s -m %g -M ProfileLikelihood --significance --pvalue -t -1 --expectSignal=1 --expectSignalMass=125 -n SigFromGridObs" % (card,mass)
+  
   print obsexec
   cmdlist.append(obsexec) 
  
