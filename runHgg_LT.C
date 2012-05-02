@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.6 2012/04/03 08:23:23 mingyang Exp $
+// $Id: runHgg_LT.C,v 1.1 2012/04/24 11:43:39 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -24,6 +24,7 @@
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/PhotonMvaMod.h"
 #include "MitPhysics/Mods/interface/MVASystematicsMod.h"
+
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -160,6 +161,8 @@ void runHgg_LT(const char *fileset    = "0000",
   eleIdMod -> SetIsoType("CombinedRelativeConeAreaCorrected");
   //                                Barrel   Endcap
   eleIdMod -> SetCombRelativeIsoCut(0.053,   0.042  );
+  eleIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+
   eleIdMod -> SetOutputName("HggLeptonTagElectrons");
 
 
@@ -176,6 +179,8 @@ void runHgg_LT(const char *fileset    = "0000",
   // isolation
   muonIdMod -> SetIsoType("CombinedRelativeConeAreaCorrected");
   muonIdMod -> SetCombRelativeIsoCut(0.1);
+  muonIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+
   muonIdMod -> SetOutputName("HggLeptonTagMuons");
 
   //------------------------------------------------------------------------------------------------
@@ -201,6 +206,7 @@ void runHgg_LT(const char *fileset    = "0000",
     jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/START42_V12_AK5PF_L2L3Residual.txt")).Data())); 
   }
   jetCorr->SetInputName(pubJet->GetOutputName());
+  jetCorr->SetRhoType(RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA);
   jetCorr->SetCorrectedName("CorrectedJets");
 
   Bool_t excludedoubleprompt = kFALSE;
@@ -317,10 +323,10 @@ void runHgg_LT(const char *fileset    = "0000",
   eleIdMod->Add(muonIdMod);
   
   muonIdMod          ->Add(photcic);
-  muonIdMod          ->Add(photpresel);  
+  //muonIdMod          ->Add(photpresel);  
 
   photcic         ->Add(phottreecic);
-  photpresel      ->Add(phottreepresel);
+  //photpresel      ->Add(phottreepresel);
 
   TFile::SetOpenTimeout(0);
   TFile::SetCacheFileDir("./rootfilecache",kTRUE,kTRUE);
