@@ -1,4 +1,4 @@
-// $Id: runHgg_LT.C,v 1.1 2012/04/24 11:43:39 fabstoec Exp $
+// $Id: runHgg_LT.C,v 1.2 2012/05/02 16:57:55 fabstoec Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -154,6 +154,7 @@ void runHgg_LT(const char *fileset    = "0000",
 
   eleIdMod -> SetIDType("Hgg_LeptonTag_WP85Id");
 
+  eleIdMod -> SetVertexName("CiCChosenVtx");
   eleIdMod -> SetWhichVertex(0);
   eleIdMod -> SetD0Cut(0.02);
   eleIdMod -> SetDZCut(0.1);
@@ -161,10 +162,10 @@ void runHgg_LT(const char *fileset    = "0000",
   eleIdMod -> SetIsoType("CombinedRelativeConeAreaCorrected");
   //                                Barrel   Endcap
   eleIdMod -> SetCombRelativeIsoCut(0.053,   0.042  );
-  eleIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+  //eleIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+  eleIdMod -> SetRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA);
 
   eleIdMod -> SetOutputName("HggLeptonTagElectrons");
-
 
   MuonIDMod* muonIdMod = new MuonIDMod;
   // base kinematics
@@ -173,13 +174,15 @@ void runHgg_LT(const char *fileset    = "0000",
   // base ID
   muonIdMod -> SetIDType("WMuId");
   // distance to Vtx restriction
+  muonIdMod -> SetVertexName("CiCChosenVtx");
   muonIdMod -> SetWhichVertex(0); // this is a 'hack'.. but hopefully good enough...
   muonIdMod -> SetD0Cut(0.02);
   muonIdMod -> SetDZCut(0.1);
   // isolation
   muonIdMod -> SetIsoType("CombinedRelativeConeAreaCorrected");
   muonIdMod -> SetCombRelativeIsoCut(0.1);
-  muonIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+  //muonIdMod -> SetRhoType(RhoUtilities::MIT_RHO_RANDOM_LOW_ETA);
+  muonIdMod -> SetRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA);
 
   muonIdMod -> SetOutputName("HggLeptonTagMuons");
 
@@ -227,6 +230,7 @@ void runHgg_LT(const char *fileset    = "0000",
     
   PhotonPairSelector         *photcic = new PhotonPairSelector("PhotonPairSelectorCiC");
   photcic->SetOutputName("GoodPhotonsCIC");
+  photcic->SetOutputVtxName("CiCChosenVtx");
   photcic->SetPhotonSelType("CiCSelection");
   photcic->SetVertexSelType("CiCMVASelection");
   photcic->DoMCSmear(kTRUE);
@@ -248,6 +252,7 @@ void runHgg_LT(const char *fileset    = "0000",
 
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
   photpresel->SetOutputName("GoodPhotonsPresel");
+  photpresel->SetOutputVtxName("PreselChosenVtx");
   photpresel->SetPhotonSelType("MITSelection");
   photpresel->SetVertexSelType("CiCMVASelection");
   photpresel->DoMCSmear(kTRUE);
@@ -285,7 +290,8 @@ void runHgg_LT(const char *fileset    = "0000",
   phottreecic->SetPFJetName(jetCorr->GetOutputName());
   phottreecic->SetExcludeDoublePrompt(excludedoubleprompt);
   phottreecic->SetIsData(isData);
-  
+
+  phottreecic->SetApplyBTag(true);
   phottreecic->SetApplyLeptonTag(true);
   phottreecic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   phottreecic->SetLeptonTagMuonsName    ("HggLeptonTagMuons");
@@ -316,17 +322,14 @@ void runHgg_LT(const char *fileset    = "0000",
   mcselmod         ->Add(hltModP);
 
   hltModP         ->Add(goodPVFilterMod);
-  goodPVFilterMod->Add(photreg);
-  photreg->Add(pubJet);
-  pubJet->Add(jetCorr);
-  jetCorr->Add(eleIdMod);
-  eleIdMod->Add(muonIdMod);
-  
-  muonIdMod          ->Add(photcic);
-  //muonIdMod          ->Add(photpresel);  
+  goodPVFilterMod ->Add(photreg);
+  photreg         ->Add(pubJet);
+  pubJet          ->Add(jetCorr);
 
-  photcic         ->Add(phottreecic);
-  //photpresel      ->Add(phottreepresel);
+  jetCorr         ->Add(photcic);
+  photcic         ->Add(eleIdMod);
+  eleIdMod        ->Add(muonIdMod);
+  muonIdMod       ->Add(phottreecic);
 
   TFile::SetOpenTimeout(0);
   TFile::SetCacheFileDir("./rootfilecache",kTRUE,kTRUE);
