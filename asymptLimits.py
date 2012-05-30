@@ -15,7 +15,7 @@ cmdlist=[]
 
 for i in range(nm):
   mass = mmin + i*(mmax-mmin)/float(nm-1)
-  obsexec = "combine -d %s -m %g -U -M Asymptotic --rRelAcc=0.001 --rAbsAcc=0.001 --minimizerStrategy=0 --rMax=30 -n LimitsFromGridObs" % (card,mass)
+  obsexec = "combine -d %s -m %g -U -M Asymptotic --rRelAcc=0.001 --rAbsAcc=0.001 --minimizerStrategy=0 --rMax=30 --run=expected -n LimitsFromGridObs" % (card,mass)
   print obsexec
   cmdlist.append(obsexec)
 
