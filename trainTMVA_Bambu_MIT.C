@@ -64,25 +64,30 @@ trigEff[34] = 0.948  ;
 trigEff[35] = 0.949  ;*/
 
 TH1D *getpuweights(TFile *file, TH1D *target) {
+  
   TDirectory *dirmcpv = (TDirectory*)file->FindObjectAny("AnaFwkMod");
   TH1D *hnpu = (TH1D*)dirmcpv->Get("hNPU");
   TH1D *hpumc = (TH1D*)hnpu->Clone();
+  
   hpumc->Sumw2();
-  hpumc->Scale(1.0/hpumc->GetSumOfWeights());
+  hpumc->Scale(1.0/hpumc->Integral(0,hpumc->GetNbinsX()+1));
   
-  //  new TCanvas;
-  //  hpumc->Draw();
   
-  //if (puweights[wset]) delete puweights[wset];
-  return new TH1D((*target)/(*hpumc));
+  TH1D *htargettmp = new TH1D("htargettmp","", hpumc->GetNbinsX(), hpumc->GetXaxis()->GetXmin(), hpumc->GetXaxis()->GetXmax());
+  htargettmp->Sumw2();
+  for (int ibin = 0; ibin<=(htargettmp->GetNbinsX()+1); ++ibin) {
+    htargettmp->Fill(htargettmp->GetBinCenter(ibin),target->GetBinContent(target->FindFixBin(htargettmp->GetBinCenter(ibin))));
+  }
+  htargettmp->Scale(1.0/htargettmp->Integral(0,htargettmp->GetNbinsX()+1));
   
-  //   new TCanvas;
-  //   hpumc->Draw();
-  //   new TCanvas;
-  //   target->Draw();
-  //   new TCanvas;
-  //   puweights[wset]->Draw();
+  TH1D *puweights = new TH1D((*htargettmp)/(*hpumc));
+    
+  delete htargettmp;
+  
+  return puweights;
+    
 }
+
 
 TH1D *puweights[11];
 float puweight(float npu, int wset=0) {
@@ -201,13 +206,7 @@ void trainTMVA_Bambu_MIT() {
   //TFile *filepuest = new TFile("/scratch/bendavid/root/puweightsNov13/2011_0100_73500.pileup.root","READ");
   TFile *filepuest = new TFile("/home/mingyang/cms/puweight/augmented_nov08_rereco.json.68000.pileup.root","READ");
   TH1D *hpuest = (TH1D*) filepuest->Get("pileup");
-  //TH1D *hpuestnorm = (TH1D*)hpuest->Clone();
-  TH1D *hpuestnorm = new TH1D("hNPU", "hNPU", 51, -0.5, 50.5);
-  for (int i=0; i<51; ++i) {
-    hpuestnorm->Fill(i,hpuest->GetBinContent(hpuest->GetXaxis()->FindFixBin(i)));
-  }  
-  hpuestnorm->Sumw2();
-  hpuestnorm->Scale(1.0/hpuestnorm->GetSumOfWeights());
+
   
   //load higgs pt-weights
   TFile *fileptweight = new TFile("/scratch/bendavid/root/KFactors_AllScales.root","READ");
@@ -313,19 +312,19 @@ void trainTMVA_Bambu_MIT() {
     procB_bgPJ->Fill();
 
   //--------------get PU weights-----------------------------------------
-  puweights[0] = getpuweights(f_signal_1,hpuestnorm);
-  puweights[1] = getpuweights(f_signal_2,hpuestnorm);
-  puweights[2] = getpuweights(f_signal_3,hpuestnorm);
-  puweights[3] = getpuweights(f_signal_4,hpuestnorm);
+  puweights[0] = getpuweights(f_signal_1,hpuest);
+  puweights[1] = getpuweights(f_signal_2,hpuest);
+  puweights[2] = getpuweights(f_signal_3,hpuest);
+  puweights[3] = getpuweights(f_signal_4,hpuest);
 
-  puweights[4] = getpuweights(f_bgBorn,hpuestnorm);
-  puweights[5] = getpuweights(f_bgBox_1,hpuestnorm);
-  puweights[6] = getpuweights(f_bgBox_2,hpuestnorm);
-  puweights[7] = getpuweights(f_bgBox_3,hpuestnorm);
+  puweights[4] = getpuweights(f_bgBorn,hpuest);
+  puweights[5] = getpuweights(f_bgBox_1,hpuest);
+  puweights[6] = getpuweights(f_bgBox_2,hpuest);
+  puweights[7] = getpuweights(f_bgBox_3,hpuest);
   
-  puweights[8] = getpuweights(f_bgQCDl,hpuestnorm);
-  puweights[9] = getpuweights(f_bgQCD,hpuestnorm);
-  puweights[10] = getpuweights(f_bgPJ,hpuestnorm);
+  puweights[8] = getpuweights(f_bgQCDl,hpuest);
+  puweights[9] = getpuweights(f_bgQCD,hpuest);
+  puweights[10] = getpuweights(f_bgPJ,hpuest);
    
   //--------------get 1/Lumi_MC------------------------------------------
   TH1D* hNE_signal_1 = (TH1D*) f_signal_1->FindObjectAny("hDAllEvents");//ming: where's it?

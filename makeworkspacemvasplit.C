@@ -79,52 +79,26 @@ float puweight(float npu, int wset=0) {
   return puweights[wset]->GetBinContent(puweights[wset]->FindFixBin(npu));
 }
 
-void setpuweightsalt(TFile *file, TH1D *target, int wset=0, int massp=0) {
-  TDirectory *dirmcpv = (TDirectory*)file->FindObjectAny("GoodPVFilterMod");
-  TH1D *hnpu = (TH1D*)dirmcpv->Get("hNGenVtx");
-  TH1D *hpumc = new TH1D(TString::Format("hpumc_%d_%d",massp,wset),"",51,-0.5,50.5);
-  
-  for (int i=0; i<50; ++i) {
-    hpumc->Fill(i,hnpu->GetBinContent(hnpu->GetXaxis()->FindFixBin(i+1)));
-  }  
-  
-  hpumc->Sumw2();
-  hpumc->Scale(1.0/hpumc->GetSumOfWeights());
-  
-//  new TCanvas;
-//  hpumc->Draw();
-  
-  //if (puweights[wset]) delete puweights[wset];
-  puweights[wset] = new TH1D((*target)/(*hpumc));
-  
-//   new TCanvas;
-//   hpumc->Draw();
-//   new TCanvas;
-//   target->Draw();
-//   new TCanvas;
-//   puweights[wset]->Draw();
-  
-}
-
 void setpuweights(TFile *file, TH1D *target, int wset=0) {//ming:set puweights for each process; might not be necessary when the pu distributions for different mc are the same
   TDirectory *dirmcpv = (TDirectory*)file->FindObjectAny("AnaFwkMod");
   TH1D *hnpu = (TH1D*)dirmcpv->Get("hNPU");
   TH1D *hpumc = (TH1D*)hnpu->Clone();
+  
   hpumc->Sumw2();
-  hpumc->Scale(1.0/hpumc->GetSumOfWeights());
+  hpumc->Scale(1.0/hpumc->Integral(0,hpumc->GetNbinsX()+1));
   
-//  new TCanvas;
-//  hpumc->Draw();
   
-  //if (puweights[wset]) delete puweights[wset];
-  puweights[wset] = new TH1D((*target)/(*hpumc));
+  TH1D *htargettmp = new TH1D("htargettmp","", hpumc->GetNbinsX(), hpumc->GetXaxis()->GetXmin(), hpumc->GetXaxis()->GetXmax());
+  htargettmp->Sumw2();
+  for (int ibin = 0; ibin<=(htargettmp->GetNbinsX()+1); ++ibin) {
+    htargettmp->Fill(htargettmp->GetBinCenter(ibin),target->GetBinContent(target->FindFixBin(htargettmp->GetBinCenter(ibin))));
+  }
+  htargettmp->Scale(1.0/htargettmp->Integral(0,htargettmp->GetNbinsX()+1));
   
-//   new TCanvas;
-//   hpumc->Draw();
-//   new TCanvas;
-//   target->Draw();
-//   new TCanvas;
-//   puweights[wset]->Draw();
+  puweights[wset] = new TH1D((*htargettmp)/(*hpumc));
+    
+  delete htargettmp;
+  
 }
 
 //pt-reweighing (but only for gf samples, use extra bool flag for now);reweight the higgs pt distribution for gf
@@ -307,7 +281,8 @@ void makeworkspacemvasplit() {
   gROOT->ForceStyle();  
 
   //---change directory---
-  gSystem->cd("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/RooWorkSpace");
+  //gSystem->cd("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/RooWorkSpace");
+  gSystem->cd("./test/");
 
   //---set overall parameters---
   bool doff = false;//ming:choose whether to do fermiphobic or not
@@ -396,15 +371,9 @@ void makeworkspacemvasplit() {
   
   //pileup weights
   //TFile *filepuest = new TFile("/scratch/bendavid/root/puweightsNov13/2011_0100_73500.pileup.root","READ");
-  TFile *filepuest = new TFile("/home/mingyang/cms/puweight/augmented_nov08_rereco.json.68000.pileup.root","READ");
+  //TFile *filepuest = new TFile("/home/mingyang/cms/puweight/augmented_nov08_rereco.json.68000.pileup.root","READ");
+  TFile *filepuest = new TFile("/home/mingyang/cms/puweight/latest_prompt_2012.json.68300.observed.pileup.root","READ");
   TH1D *hpuest = (TH1D*) filepuest->Get("pileup");
-  //TH1D *hpuestnorm = (TH1D*)hpuest->Clone();
-  TH1D *hpuestnorm = new TH1D("hNPU", "hNPU", 51, -0.5, 50.5);
-  for (int i=0; i<51; ++i) {
-    hpuestnorm->Fill(i,hpuest->GetBinContent(hpuest->GetXaxis()->FindFixBin(i)));
-  }  
-  hpuestnorm->Sumw2();
-  hpuestnorm->Scale(1.0/hpuestnorm->GetSumOfWeights());//normalized pu distribution for data with 51 bins
   
   //pt-weights
   TFile *fileptweight = new TFile("/scratch/bendavid/root/KFactors_AllScales.root","READ");//ming:?
@@ -644,10 +613,10 @@ void makeworkspacemvasplit() {
     TFile *fvh = new TFile(TString::Format(vhsamplestring,masspoint,"vh"),"READ");
     TFile *ftt = new TFile(TString::Format(ttsamplestring,masspoint,"tt"),"READ");
     
-    setpuweights(fgf,hpuestnorm,0);
-    setpuweights(fvbf,hpuestnorm,1);
-    setpuweights(fvh,hpuestnorm,2);
-    if (dott) setpuweights(ftt,hpuestnorm,3);
+    setpuweights(fgf,hpuest,0);
+    setpuweights(fvbf,hpuest,1);
+    setpuweights(fvh,hpuest,2);
+    if (dott) setpuweights(ftt,hpuest,3);
     
     //define aggregate weight, so far using xsec, pileup, pt-reweighting and efficiency scale factors
     RooArgList weightvarlist(*IntLumi,xsecweight,numPU,higgspt,procidx,ph1Cat,ph2Cat,ph1pt,ph2pt);
