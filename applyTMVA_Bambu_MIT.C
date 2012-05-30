@@ -24,7 +24,7 @@ float ptweight(float genhpt, Int_t procid) {
 }
 
 //efficiency scale factors (barrel/endcap for now, but can be extended to full kinematic binning)
-float effweight(int cat) {
+/*float effweight(int cat) {
   //lp11 numbers
 //   if (cat==1) return 0.993*1.002;
 //   else if (cat==2) return 1.011*1.011;
@@ -48,11 +48,44 @@ float effweight(int cat) {
 //   else return 1.0;  
 
   //return 1.0;
+  //ming:needs to be changed to the preselection category instead of cic category
   if (cat==1) return 0.999;
   else if (cat==2) return 0.984;
   else if (cat==3) return 1.006;
   else if (cat==4) return 1.014;
   else return 1.0;  
+
+  }*/
+
+//ming change
+float effweight(int cat, float r9) {
+  
+  double scale=1.0;
+  
+  bool iseb = (cat==1 || cat==2);
+  bool isr9 = r9>0.9;
+  
+  //ele veto for nov30 in CIC category (number from Doug)
+  //if (cat==1) scale*=1.002;
+  //else if (cat==2) scale*=1.011;
+  //else if (cat==3) scale*=1.000;
+  //else if (cat==4) scale*=0.996;
+
+  //conversion safe ele veto efficiency Data/MC scale factor from 2012jan16 in CIC category (number from Doug)
+  //https://hypernews.cern.ch/HyperNews/CMS/get/AUX/2012/04/16/15:22:40-54817-ElectronVeto.pdf slide 11
+  if (cat==1) scale*=1.000;//100/100
+  else if (cat==2) scale*=1.000;//99.7/99.7
+  else if (cat==3) scale*=1.005;//99.3/98.8
+  else if (cat==4) scale*=1.029;//98.1/95.3
+  
+  //2012jan16 presel scale factors (number from Matteo)
+  //ming:are these number derived for PT>25?
+  if (iseb&&isr9) scale*=0.999;
+  else if (iseb&&!isr9) scale*=0.984;
+  else if (!iseb&&isr9) scale*=1.006;
+  else if (!iseb && !isr9) scale*=1.014;
+  
+  return scale;
 }
 
 float trigeffweight(int cat1, int cat2, double pt1, double pt2) {
@@ -152,7 +185,7 @@ int eventCat(int cat1, int cat2) {
 }
 
 void applyTMVA_Bambu_MIT() {
-
+  //trig eff calculated by Fabian
   trigEff[0] = 0.990  ;   
   trigEff[1] = 0.989  ;
   trigEff[2] = 0.977  ; 
@@ -190,10 +223,10 @@ void applyTMVA_Bambu_MIT() {
   trigEff[34] = 0.948  ;
   trigEff[35] = 0.949  ;
   
-  printf("good1\n");
   //---------------------------------------------------------------
   // setting up the weight.
-  TFile *filepuest = new TFile("/home/mingyang/cms/puweight/augmented_nov08_rereco.json.68000.pileup.root","READ");
+  //TFile *filepuest = new TFile("/home/mingyang/cms/puweight/augmented_nov08_rereco.json.68000.pileup.root","READ");//jan16 rereco
+  TFile *filepuest = new TFile("/home/mingyang/cms/puweight/latest_prompt_2012.json.68300.observed.pileup.root","READ");//2012 ICHEP
   TH1D *hpuest = (TH1D*) filepuest->Get("pileup");
   //TH1D *hpuestnorm = (TH1D*)hpuest->Clone();
   TH1D *hpuestnorm = new TH1D("hNPU", "hNPU", 51, -0.5, 50.5);
@@ -203,12 +236,12 @@ void applyTMVA_Bambu_MIT() {
   hpuestnorm->Sumw2();
   hpuestnorm->Scale(1.0/hpuestnorm->GetSumOfWeights());
   
+  //higgs pt reweight of powheg sample to HQt; this needed for 2011 samples but not 2012 samples   
   //load pt-weights
   TFile *fileptweight = new TFile("/scratch/bendavid/root/KFactors_AllScales.root","READ");
-  ptweights= (TH1D*) fileptweight->Get("kfact125_0");  
-
+  //ptweights= (TH1D*) fileptweight->Get("kfact125_0");  
+  ptweights= (TH1D*) fileptweight->Get("kfact120_0"); 
   
-
   //---------------------------------------------------------------
 
   TString baseDir="RunLumiSelectionMod/MCProcessSelectionMod/HLTModP/GoodPVFilterMod/PhotonMvaMod/JetPub/JetCorrectionMod/PhotonPairSelectorPresel/PhotonTreeWriterPresel/";
@@ -217,10 +250,15 @@ void applyTMVA_Bambu_MIT() {
   
   //TString baseDir="RunLumiSelectionMod/MCProcessSelectionMod/HLTModP/GoodPVFilterMod/PhotonMvaMod/JetPub/JetCorrectionMod/PhotonPairSelector/PhotonTreeWriter/";
 
-  TString signal_1 ="hgg-v0_f11--h125gg-gf-v14b-pu_noskim.root";
+  /*TString signal_1 ="hgg-v0_f11--h125gg-gf-v14b-pu_noskim.root";
   TString signal_2 ="hgg-v0_f11--h125gg-vbf-v14b-pu_noskim.root";
   TString signal_3 ="hgg-v0_f11--h125gg-vh-v14b-pu_noskim.root";
-  TString signal_4 ="hgg-v0_f11--h125gg-tt-v14b-pu_noskim.root";
+  TString signal_4 ="hgg-v0_f11--h125gg-tt-v14b-pu_noskim.root";*/
+
+  TString signal_1 ="hgg-v0_f11--h120gg-gf-v14b-pu_noskim.root";
+  TString signal_2 ="hgg-v0_f11--h120gg-vbf-v14b-pu_noskim.root";
+  TString signal_3 ="hgg-v0_f11--h120gg-vh-v14b-pu_noskim.root";
+  TString signal_4 ="hgg-v0_f11--h120gg-tt-v14b-pu_noskim.root";
 
   TString bgBorn   ="hgg-v0_f11--diphoj-v14b-pu_noskim.root";
   TString bgBox_1  ="hgg-v0_f11--2pibx10_25-v14b-pu_noskim.root";
@@ -295,7 +333,7 @@ void applyTMVA_Bambu_MIT() {
   TH1D* hNE_signal_4 = (TH1D*) f_signal_4->FindObjectAny("hDAllEvents");
 
   double theLumi=5089;
-
+  //double theLumi=4800;
   
   
   //lumi weights for mh=125 GeV, normalize to theLumi
@@ -380,10 +418,36 @@ void applyTMVA_Bambu_MIT() {
 
   Float_t _jet1pt, _jet2pt;
   Float_t _jet1eta, _jet2eta;
+  Float_t _jet1phi, _jet2phi;
+  Float_t _jet1mass, _jet2mass;
   Float_t _dijetmass, _zeppenfeld, _dphidijetgg;  
   
   Float_t _relRes1, _relRes2;
+
+  //add ming
+  Float_t _ph1r9, _ph2r9;
   
+  //-----add for sync-----
+  UInt_t _run;
+  UInt_t _lumi;
+  UInt_t _evt;
+  Float_t _ptgg;
+  Float_t _deltamvtx;
+  Float_t _pfmet;
+  Float_t _relresraw1, _relresraw2;
+  Float_t _etcorecaliso1, _etcorecaliso2;
+  Float_t _etcorhcaliso1, _etcorhcaliso2;
+  Float_t _etcortrkiso1, _etcortrkiso2;
+  Float_t _abstrkisocic1, _abstrkisocic2;
+  Float_t _hollowconetrkiso031, _hollowconetrkiso032;
+  Float_t _ecaliso031, _ecaliso032;
+  Float_t _hcaliso031, _hcaliso032;
+  Float_t _hovere1, _hovere2;
+  Float_t _sigietaieta1,_sigietaieta2;
+  Float_t _vtxz, _genz;
+  Float_t _rho;
+  Float_t _pucorrhcalecal1, _pucorrhcalecal2;
+
   TMVA::Reader* tmva = new TMVA::Reader();
   printf("good3\n");
   tmva->AddVariable("masserrsmeared/mass",    &_relRes);
@@ -398,10 +462,14 @@ void applyTMVA_Bambu_MIT() {
   tmva->AddVariable("ph2.idmva"   , &_ph2idmva  );    
   printf("good4\n");
   TFile* outFile = NULL;
-  tmva->BookMVA("BDTG","/home/mingyang/cms/root/weights/HggBambu_SMDipho_Jan16_BDTG.weights.xml");
+  //tmva->BookMVA("BDTG","/home/mingyang/cms/root/weights/HggBambu_SMDipho_Jan16_BDTG.weights.xml");
+  tmva->BookMVA("BDTG","/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/diphotonMVA/weights/HggBambu_SMDipho_Jan16_BDTG.weights.xml");
   printf("good5\n");
-  outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/Tmva_AppOutput_SMDipho_2012Jan16.root","RECREATE");
-
+  //outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/Tmva_AppOutput_SMDipho_2012Jan16_sync.root","RECREATE");
+  //outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/Tmva_AppOutput_SMDipho_2012Jan16_4.8fb-1.root","RECREATE");
+  //outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/Tmva_AppOutput_SMDipho_2012Jan16_NewVBF_120.root","RECREATE");
+  //outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/diphotonMVA/Tmva_AppOutput_SMDipho_2012Jan16_CorrScaleFForMakeDatacard.root","RECREATE");
+  outFile= new TFile("/home/mingyang/cms/root/RootFiles/hggmva_2012_jan16/diphotonMVA/Tmva_AppOutput_SMDipho_2012Jan16_CorrScaleF.root","RECREATE");
   //TNtuple* outTuple = new TNtuple("MITMVAtuple","","mass:res:reswrong:vtxprob:mva:weight:proc:cat1:cat2:pt1:pt2:eta1:eta2:phi1:phi2:numPU:evcat");
   
   TTree* outTuple = new TTree("MITMVAtuple","");
@@ -429,10 +497,14 @@ void applyTMVA_Bambu_MIT() {
   outTuple->Branch("numPU", &_numPU, "numPU/I");
   outTuple->Branch("evcat", &_evCat, "evcat/I");
   outTuple->Branch("vbftag", &_vbftag, "vbftag/B");
-  outTuple->Branch("jet1pt", &_jet1pt, "jet1pt/F");
-  outTuple->Branch("jet2pt", &_jet2pt, "jet2pt/F");
-  outTuple->Branch("jet1eta", &_jet1eta, "jet1eta/F");
-  outTuple->Branch("jet2eta", &_jet2eta, "jet2eta/F");
+  outTuple->Branch("jet1pt", &_jet1pt, "jet1pt/F");//ming
+  outTuple->Branch("jet2pt", &_jet2pt, "jet2pt/F");//ming
+  outTuple->Branch("jet1eta", &_jet1eta, "jet1eta/F");//ming
+  outTuple->Branch("jet2eta", &_jet2eta, "jet2eta/F");//ming
+  outTuple->Branch("jet1phi", &_jet1phi, "jet1phi/F");
+  outTuple->Branch("jet2phi", &_jet2phi, "jet2phi/F");
+  outTuple->Branch("jet1mass", &_jet1mass, "jet1mass/F");
+  outTuple->Branch("jet2mass", &_jet2mass, "jet2mass/F");
   outTuple->Branch("dijetmass", &_dijetmass, "dijetmass/F");
   outTuple->Branch("zeppenfeld", &_zeppenfeld, "zeppenfeld/F");
   outTuple->Branch("dphidijetgg", &_dphidijetgg, "dphidijetgg/F");  
@@ -440,9 +512,40 @@ void applyTMVA_Bambu_MIT() {
   outTuple->Branch("relres2", &_relRes2, "relres2/F");  
   outTuple->Branch("resup", &_relResUp, "resup/F");  
   outTuple->Branch("resdown", &_relResDown, "resdown/F");  
+  //ming add
+  outTuple->Branch("r91", &_ph1r9, "r91/F");
+  outTuple->Branch("r92", &_ph2r9, "r92/F");
 
-  
+  //-------add for sync---------
+  outTuple->Branch("run", &_run, "run/i");  
+  outTuple->Branch("lumi", &_lumi, "lumi/i");  
+  outTuple->Branch("evt", &_evt, "evt/i");  
+  outTuple->Branch("ptgg", &_ptgg, "ptgg/F");  
+  outTuple->Branch("pfmet", &_pfmet, "pfmet/F");  
+  outTuple->Branch("e1",&_ph1e,"e1/F");
+  outTuple->Branch("e2",&_ph2e,"e2/F");
+  outTuple->Branch("relresraw1",&_relresraw1,"relresraw1/F");
+  outTuple->Branch("relresraw2",&_relresraw2,"relresraw2/F");  
+  outTuple->Branch("etcorecaliso1",&_etcorecaliso1,"etcorecaliso1/F");
+  outTuple->Branch("etcorecaliso2",&_etcorecaliso2,"etcorecaliso2/F");  
+  outTuple->Branch("etcorhcaliso1",&_etcorhcaliso1,"etcorhcaliso1/F");
+  outTuple->Branch("etcorhcaliso2",&_etcorhcaliso2,"etcorhcaliso2/F");    
+  outTuple->Branch("etcortrkiso1",&_etcortrkiso1,"etcortrkiso1/F");
+  outTuple->Branch("etcortrkiso2",&_etcortrkiso2,"etcortrkiso2/F");    
+  outTuple->Branch("abstrkisocic1",&_abstrkisocic1,"abstrkisocic1/F");
+  outTuple->Branch("abstrkisocic2",&_abstrkisocic2,"abstrkisocic2/F");    
+  outTuple->Branch("hollowconetrkiso031",&_hollowconetrkiso031,"hollowconetrkiso031/F");
+  outTuple->Branch("hollowconetrkiso032",&_hollowconetrkiso032,"hollowconetrkiso032/F");  
+  outTuple->Branch("sigietaieta1",&_sigietaieta1,"sigietaieta1/F");//ming add
+  outTuple->Branch("sigietaieta2",&_sigietaieta2,"sigietaieta2/F");//ming add
+  outTuple->Branch("hovere1",&_hovere1,"hovere1/F");//ming add
+  outTuple->Branch("hovere2",&_hovere2,"hovere2/F");//ming add
+  outTuple->Branch("rho",&_rho,"rho/F");//ming add 
+  outTuple->Branch("pucorrhcalecal1",& _pucorrhcalecal1,"pucorrhcalecal1/F");//ming add
+  outTuple->Branch("pucorrhcalecal2",&_pucorrhcalecal2,"pucorrhcalecal2/F");//ming add
+ 
   outTuple->SetAutoFlush(-100000000);
+
   printf("good6\n");
   TTree** allTrees = new TTree*[12];
   allTrees[0] = t_signal_1;
@@ -507,24 +610,56 @@ void applyTMVA_Bambu_MIT() {
     theTree->SetBranchAddress("jet1pt" , &_jet1pt    );
     theTree->SetBranchAddress("jet2pt" , &_jet2pt    );
     theTree->SetBranchAddress("jet1eta" , &_jet1eta    );
-    theTree->SetBranchAddress("jet2eta" , &_jet2eta    );    
+    theTree->SetBranchAddress("jet2eta" , &_jet2eta    );  
+    theTree->SetBranchAddress("jet1phi" , &_jet1phi);//ming add;  
+    theTree->SetBranchAddress("jet2phi" , &_jet2phi);//ming add;  
+    theTree->SetBranchAddress("jet1mass" , &_jet1mass);//ming add;  
+    theTree->SetBranchAddress("jet2mass" , &_jet2mass);//ming add;  
     theTree->SetBranchAddress("dijetmass" , &_dijetmass    );
     theTree->SetBranchAddress("zeppenfeld" , &_zeppenfeld    );
     theTree->SetBranchAddress("dphidijetgg" , &_dphidijetgg    );    
+
+    theTree->SetBranchAddress("run" , &_run    );  
+    theTree->SetBranchAddress("lumi" , &_lumi    );    
+    theTree->SetBranchAddress("evt" , &_evt    ); 
+    theTree->SetBranchAddress("ptgg" , &_ptgg    );    
+    theTree->SetBranchAddress("deltamvtx" , &_deltamvtx    );    
     
-    
+
+    theTree->SetBranchAddress("ph1.trkisohollowdr03" , &_hollowconetrkiso031    );    
+    theTree->SetBranchAddress("ph2.trkisohollowdr03" , &_hollowconetrkiso032    );    
+    theTree->SetBranchAddress("ph1.ecalisodr03" , &_ecaliso031    );    
+    theTree->SetBranchAddress("ph2.ecalisodr03" , &_ecaliso032    );        
+    theTree->SetBranchAddress("ph1.hcalisodr03" , &_hcaliso031    );    
+    theTree->SetBranchAddress("ph2.hcalisodr03" , &_hcaliso032    );        
+    theTree->SetBranchAddress("ph1.trackiso1" , &_abstrkisocic1   );    
+    theTree->SetBranchAddress("ph2.trackiso1" , &_abstrkisocic2   );            
+    theTree->SetBranchAddress("ph1.sigietaieta" , &_sigietaieta1   );//ming add
+    theTree->SetBranchAddress("ph2.sigietaieta" , &_sigietaieta2  );//ming add   
+    theTree->SetBranchAddress("ph1.hovere" , &_hovere1  );
+    theTree->SetBranchAddress("ph2.hovere" , &_hovere2  );     
+    theTree->SetBranchAddress("rho" , &_rho  );   
+    theTree->SetBranchAddress("vtxZ" , &_vtxz);            
+    theTree->SetBranchAddress("genHiggsZ" , &_genz);      
+    theTree->SetBranchAddress("pfmet" , &_pfmet);    
+
+    //ming add
+    theTree->SetBranchAddress("ph1.r9" ,     &_ph1r9  );
+    theTree->SetBranchAddress("ph2.r9" ,     &_ph2r9  );       
+     
     TTreeFormula basecut("basecut","ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.pt>(100.0/3.0) && ph2.pt>(100.0/4.0) && mass > 100. && ph1.idmva>-0.3 && ph2.idmva>-0.3",theTree);
     //TTreeFormula basecut("basecut","mass > 100.",theTree);
-    TTreeFormula vbfcut("vbfcut","jet1pt>30.0 && jet2pt>20.0 && abs(jet1eta-jet2eta)>3.5 && dijetmass>350.0 && zeppenfeld<2.5 && abs(dphidijetgg)>2.6",theTree);//ming:zeppenfeld?
-    printf("good8\n");
+    //TTreeFormula vbfcut("vbfcut","jet1pt>30.0 && jet2pt>20.0 && abs(jet1eta-jet2eta)>3.5 && dijetmass>350.0 && zeppenfeld<2.5 && abs(dphidijetgg)>2.6",theTree);//ming:zeppenfeld?
+    TTreeFormula vbfcut("vbfcut","jet1pt>30.0 && jet2pt>20.0 && abs(jet1eta-jet2eta)>3.5 && dijetmass>350.0 && zeppenfeld<2.5 && abs(dphidijetgg)>2.6 && ph1.pt>(mass*55.0/120.0)",theTree);//ming:zeppenfeld?
+   
     for(int i=1; i<=theTree->GetEntries(); ++i) {
       theTree->GetEntry(i);
-//       if( _ph1pt/_mass < 40./120. || _ph2pt/_mass < 30./120. ) continue;
-//       if( _mass < 100. ) continue;
+      //       if( _ph1pt/_mass < 40./120. || _ph2pt/_mass < 30./120. ) continue;
+      //       if( _mass < 100. ) continue;
 
-       bool pass = basecut.EvalInstance();
-       if (!pass) continue;
-
+      bool pass = basecut.EvalInstance();
+      if (!pass) continue;
+     
       _pt1m  =_ph1pt/_mass;
       _pt2m  =_ph2pt/_mass;
       _dphi  = TMath::Cos(_ph1phi - _ph2phi);
@@ -551,7 +686,7 @@ void applyTMVA_Bambu_MIT() {
       _relRes1 = (1.0+_ismc*_ph1isbarrel*0.07+_ismc*(!_ph1isbarrel)*0.045)*_ph1eerr/_ph1e;
       _relRes2 = (1.0+_ismc*_ph2isbarrel*0.07+_ismc*(!_ph2isbarrel)*0.045)*_ph2eerr/_ph2e;
       
-      _relResUp  = (pow(1.0+_ismc*_ph1isbarrel*0.07+_ismc*(!_ph1isbarrel)*0.045,2)*1.1*1.1*_ph1eerr*_ph1eerr+_ph1esmearing*_ph1esmearing)/_ph1e/_ph1e;
+      _relResUp  = (pow(1.0+_ismc*_ph1isbarrel*0.07+_ismc*(!_ph1isbarrel)*0.045,2)*1.1*1.1*_ph1eerr*_ph1eerr+_ph1esmearing*_ph1esmearing)/_ph1e/_ph1e;//ming: 1.1 is estimated by eye from the comparison between data ans MC
       _relResUp += (pow(1.0+_ismc*_ph2isbarrel*0.07+_ismc*(!_ph2isbarrel)*0.045,2)*1.1*1.1*_ph2eerr*_ph2eerr+_ph2esmearing*_ph2esmearing)/_ph2e/_ph2e;
 //       _relResUp  = _relRes1*_relRes1*1.05*1.05;
 //       _relResUp += _relRes2*_relRes2*1.05*1.05;
@@ -583,11 +718,30 @@ void applyTMVA_Bambu_MIT() {
       
       _vbftag = vbfcut.EvalInstance();
       
-      
+      //-----add for syn----
+      _etcorecaliso1 = _ecaliso031 - 0.012*_ph1pt;
+      _etcorecaliso2 = _ecaliso032 - 0.012*_ph2pt;
+      _etcorhcaliso1 = _hcaliso031 - 0.005*_ph1pt;
+      _etcorhcaliso2 = _hcaliso032 - 0.005*_ph2pt;
+      _etcortrkiso1 = _hollowconetrkiso031 - 0.002*_ph1pt;
+      _etcortrkiso2 = _hollowconetrkiso032 - 0.002*_ph2pt;
+      _pucorrhcalecal1= _hcaliso031+ _ecaliso031-0.17*_rho;
+      _pucorrhcalecal2= _hcaliso032+_ecaliso032-0.17*_rho;
+      _relresraw1 = _ph1eerr/_ph1e;
+      _relresraw2 = _ph2eerr/_ph2e;  
+     
       
       // compute the weight
-      if (jj<11) {
+      /*if (jj<11) {
         _weight = weights[jj] * puweight(_numPU,jj) * ptweight(_pth,jj) * effweight(_ph1cat) *effweight(_ph2cat) * trigeffweight(_ph1cat,_ph2cat,_ph1pt, _ph2pt);
+        if (!_ph1ispromptgen && !_ph2ispromptgen) _weight*=1.0/1.3;
+      }
+      else _weight = 1.0;*/
+
+      //ming change
+      if (jj<11) {
+        //_weight = weights[jj] * puweight(_numPU,jj) * ptweight(_pth,jj) * effweight(_ph1cat,_ph1r9) *effweight(_ph2cat,_ph2r9) * trigeffweight(_ph1cat,_ph2cat,_ph1pt, _ph2pt);
+	_weight = weights[jj] * puweight(_numPU,jj) * effweight(_ph1cat,_ph1r9) *effweight(_ph2cat,_ph2r9) * trigeffweight(_ph1cat,_ph2cat,_ph1pt, _ph2pt);
         if (!_ph1ispromptgen && !_ph2ispromptgen) _weight*=1.0/1.3;
       }
       else _weight = 1.0;
@@ -614,6 +768,7 @@ void applyTMVA_Bambu_MIT() {
 // 		      );
       
     }
+    printf("good8\n");
   }
     
   outTuple->Write();

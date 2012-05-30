@@ -122,7 +122,7 @@ float effweight(int cat) {
 //   else if (cat==4) return 1.052*0.996;
 //   else return 1.0;  
 
-  //2012 jan16 freeze numbers(ming: accroding to Matteo's email)
+  //2012 Jan16 freeze numbers(ming: accroding to Matteo's email
   //scale factor for the effieicnecy of the single photon
   if (cat==1) return 0.999;
   else if (cat==2) return 0.984;
@@ -328,17 +328,17 @@ void trainTMVA_Bambu_MIT() {
   puweights[10] = getpuweights(f_bgPJ,hpuestnorm);
    
   //--------------get 1/Lumi_MC------------------------------------------
-  TH1D* hNE_signal_1 = (TH1D*) f_signal_1->FindObjectAny("hDAllEvents");//
+  TH1D* hNE_signal_1 = (TH1D*) f_signal_1->FindObjectAny("hDAllEvents");//ming: where's it?
   TH1D* hNE_signal_2 = (TH1D*) f_signal_2->FindObjectAny("hDAllEvents");
   TH1D* hNE_signal_3 = (TH1D*) f_signal_3->FindObjectAny("hDAllEvents");
   TH1D* hNE_signal_4 = (TH1D*) f_signal_4->FindObjectAny("hDAllEvents");
 
-  //double w_signal_1 = 0.03742/hNE_signal_1->GetBinContent(1);
+  //double w_signal_1 = 0.03742/hNE_signal_1->GetBinContent(1);//ming:pb
   //double w_signal_2 = 0.00286/hNE_signal_2->GetBinContent(1);
   //double w_signal_3 = 0.00229/hNE_signal_3->GetBinContent(1);
   //double w_signal_4 = 0.00022/hNE_signal_4->GetBinContent(1);
   
-  double w_signal_1 = 0.03607/hNE_signal_1->GetBinContent(1);
+  double w_signal_1 = 0.03607/hNE_signal_1->GetBinContent(1);//ming:pb
   double w_signal_2 = 0.00281/hNE_signal_2->GetBinContent(1);
   double w_signal_3 = 0.00214/hNE_signal_3->GetBinContent(1);
   double w_signal_4 = 0.00021/hNE_signal_4->GetBinContent(1);
@@ -359,7 +359,7 @@ void trainTMVA_Bambu_MIT() {
   double w_bgQCDl  = 1.3*10868.0/hNE_bgQCDl->GetBinContent(1);  
   
   TH1D* hNE_bgQCD = (TH1D*) f_bgQCD->FindObjectAny("hDAllEvents");
-  double w_bgQCD  = 1.3*1.87E+07*0.0023/hNE_bgQCD->GetBinContent(1);//0.0023 should be the double EM enriched filter efficiency
+  double w_bgQCD  = 1.3*1.87E+07*0.0023/hNE_bgQCD->GetBinContent(1);//ming:0.0023 should be the double EM enriched filter efficiency
 
   TH1D* hNE_bgPJ = (TH1D*) f_bgPJ->FindObjectAny("hDAllEvents");
   double w_bgPJ  = 1.3*77100.*0.0065/hNE_bgPJ->GetBinContent(1);
