@@ -577,7 +577,7 @@ void plotstack(TString name, TTree *tdata, TTree *tmc, TString draw, TCut cut, T
 
   
   if (hdata->GetMaximum()>hbkg->GetMaximum()) {
-    hbkg->SetMaximum(1.1*hbkg->GetMaximum());
+    hbkg->SetMaximum(1.1*hdata->GetMaximum());
   }
      
   
@@ -1038,7 +1038,7 @@ void stackplotsmva() {
   gStyle->SetOptStat(0);
   gROOT->ForceStyle();    
   
-  gSystem->cd("./scaleplotJun17");
+  gSystem->cd("./scaleplotJun18");
   
   //-------------set up the weights-------------------
   //pu target
@@ -1085,7 +1085,7 @@ void stackplotsmva() {
 
   
   const double lumi = 3058.;  
-  initweights(tree,hpuest,xsecs,lumi);
+  //initweights(tree,hpuest,xsecs,lumi);
   puweights[13] = 0;
   xsecweights[13] = 1.0;
    
@@ -1113,11 +1113,14 @@ void stackplotsmva() {
     printf("ebvarsnew[%i] = \"%s\";\n",i,ebvarsnew.at(i).c_str());
   }
 
-  ebvarsnew[4] = "TMath::Min(1.0,(1.0+ismc*0.0016)*ph.e5x5/ph.scrawe)";  
+//hard cutoff - e5x5/scraw endcap, eseed/scrawe both (eseed/scrawe barrel no scale)
+//soft cutoff e5x5/scraw barrel, e5x5/seed barrel
+
+  ebvarsnew[4] = "( ((ph1.e5x5seed/ph1.eseed)<=1.0)*TMath::Min(1.0,1.0022*ph1.e5x5seed/ph1.eseed) +  ((ph1.e5x5seed/ph1.eseed)>1.0)*ph1.e5x5seed/ph1.eseed )*ph1.eseed/ph1.scrawe";  
   //ebvarsnew[13] = "(1.0+ismc*0.0016)*ph.eseed/ph.scrawe";  
   //ebvarsnew[14] = "(1.0+ismc*0045)*ph.e3x3seed/ph.eseed + ismc*0.00";  
   ebvarsnew[14] = "ph.r9*ph.scrawe/ph.eseed";  
-  ebvarsnew[15] = "(TMath::Min(1.0,1.0+ismc*0.0016)*ph.e5x5seed/ph.eseed)";   
+  ebvarsnew[15] = "( ((ph1.e5x5seed/ph1.eseed)<=1.0)*TMath::Min(1.0,1.0022*ph1.e5x5seed/ph1.eseed) +  ((ph1.e5x5seed/ph1.eseed)>1.0)*ph1.e5x5seed/ph1.eseed )";   
   ebvarsnew[16] = "(1.0 - ismc*0.108168)*ph.sigietaietaseed + ismc*0.0009133";
   ebvarsnew[17] = "(1.0 - ismc*0.007)*ph.sigiphiphiseed";
   ebvarsnew[19] = "(1.0 + ismc*0.012)*ph.emaxseed/ph.eseed";
@@ -1181,14 +1184,14 @@ void stackplotsmva() {
 
   
   GBRApply<GBRForest> apply;
-//   apply.ApplyAsFriend(hmc,forestvareb,ebvarsnew1,"ph1.eerrmodebraw");
-//   apply.ApplyAsFriend(hmc,forestvareb,ebvarsnew2,"ph2.eerrmodebraw");
-//   apply.ApplyAsFriend(hmc,forestvaree,eevarsnew1,"ph1.eerrmodeeraw");
-//   apply.ApplyAsFriend(hmc,forestvaree,eevarsnew2,"ph2.eerrmodeeraw");
-  apply.ApplyAsFriend(tree,forestvareb,ebvarsnew1,"ph1.eerrmodebraw");
-  apply.ApplyAsFriend(tree,forestvareb,ebvarsnew2,"ph2.eerrmodebraw");
-  apply.ApplyAsFriend(tree,forestvaree,eevarsnew1,"ph1.eerrmodeeraw");
-  apply.ApplyAsFriend(tree,forestvaree,eevarsnew2,"ph2.eerrmodeeraw");  
+  apply.ApplyAsFriend(hmc,forestvareb,ebvarsnew1,"ph1.eerrmodebraw");
+  apply.ApplyAsFriend(hmc,forestvareb,ebvarsnew2,"ph2.eerrmodebraw");
+  apply.ApplyAsFriend(hmc,forestvaree,eevarsnew1,"ph1.eerrmodeeraw");
+  apply.ApplyAsFriend(hmc,forestvaree,eevarsnew2,"ph2.eerrmodeeraw");
+//   apply.ApplyAsFriend(tree,forestvareb,ebvarsnew1,"ph1.eerrmodebraw");
+//   apply.ApplyAsFriend(tree,forestvareb,ebvarsnew2,"ph2.eerrmodebraw");
+//   apply.ApplyAsFriend(tree,forestvaree,eevarsnew1,"ph1.eerrmodeeraw");
+//   apply.ApplyAsFriend(tree,forestvaree,eevarsnew2,"ph2.eerrmodeeraw");  
   
   tree->SetAlias("ph1.eerrmod","ismc*(ph1.isbarrel*ph1.scrawe*ph1.eerrmodebraw + (!ph1.isbarrel)*(ph1.scrawe+ph1.scpse)*ph1.eerrmodeeraw) + (!ismc)*ph1.eerr");
   tree->SetAlias("ph2.eerrmod","ismc*(ph2.isbarrel*ph2.scrawe*ph2.eerrmodebraw + (!ph2.isbarrel)*(ph2.scrawe+ph2.scpse)*ph2.eerrmodeeraw) + (!ismc)*ph2.eerr");  
@@ -1208,8 +1211,8 @@ void stackplotsmva() {
   
   TCut diphojCut = "!( (procidx==7) && ((evt>=270000 && evt<=390000) || (evt>=480000 && evt<=510000) || (evt>=1170000 && evt<=1200000) || (evt>=1230000 && evt<=1260000)  || (evt>=1890000 && evt<=1920000)  || (evt>=2670000 && evt<=2730000) || (evt>=3090000 && evt<=3210000) || (evt>=3270000 && evt<=3300000) || (evt>=3510000 && evt<=3600000) || (evt>=4890000 && evt<=5010000) || (evt>=5340000 && evt<=5370000) || (evt>=5430000 && evt<=5500000)))";  
   
-  TCut cut("xsecweight(procidx)*puweight(numPU,procidx)*(ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.idmva>0.05 && ph2.idmva>-0.3)");
-  //TCut cut("xsecweight(15)*puweight(numPU,15)*(ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.idmva>-0.3 && ph2.idmva>-0.3)");
+  //TCut cut("xsecweight(procidx)*puweight(numPU,procidx)*(ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.idmva>0.05 && ph2.idmva>-0.3)");
+  TCut cut("xsecweight(15)*puweight(numPU,15)*(ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.idmva>-0.3 && ph2.idmva>-0.3)");
   
   
   //TCut cut("xsecweight(0)*puweight(numPU,0)*(ph1.pt>(mass/3.0) && ph2.pt>(mass/4.0) && ph1.idmva>-0.3 && ph2.idmva>-0.3)");
@@ -1223,11 +1226,11 @@ void stackplotsmva() {
 
   //TCut masscut= kcut*diphojCut*cut*TCut("(mass>150)");
   
-  TCut masscut= kcut*diphojCut*cut*TCut("(mass>160)");
-  TCut masscutlow= kcut*diphojCut*cut*TCut("(mass>100 && mass<160)");
+//   TCut masscut= kcut*diphojCut*cut*TCut("(mass>160)");
+//   TCut masscutlow= kcut*diphojCut*cut*TCut("(mass>100 && mass<160)");
 
-//   TCut masscut= cut*TCut("(mass>65 && mass<115 && ph1.pt>80)");
-//   TCut masscutlow= cut*TCut("(mass>65 && mass<115)");
+  TCut masscut= cut*TCut("(mass>65 && mass<115 && ph1.pt>80)");
+  TCut masscutlow= cut*TCut("(mass>65 && mass<115)");
   
   //TCut masscutlow= kcut*diphojCut*cut*TCut("(mass>70 && mass<115)");
   TCut ebcut = masscut*TCut("ph1.isbarrel");
@@ -1256,8 +1259,10 @@ void stackplotsmva() {
 //   plotstack("pt1barrel",hdata,hmc,"massmvacorerrmod",nebcutlow,"lead p_{T} (GeV)","# of events/GeV",0.0,5.0,100,true);
 // 
 //   //return;
-//   cbfits("massreseb", ebebcutlow, hmc, hdata, "massmvacorerrmod", "massmvacorerrmod", 20, 0., 3.5, "x", "#sigma_{m} (GeV)",1.0);
-//   cbfits("massresneb", nebcutlow, hmc, hdata, "massmvacorerrmod", "massmvacorerrmod", 20, 1.2, 5.0, "x", "#sigma_{m} (GeV)",3.0);
+   cbfits("massreseb", ebebcutlow, hmc, hdata, "massmvacorerrmod", "massmvacorerrmod", 20, 0., 3.5, "x", "#sigma_{m} (GeV)",1.0);
+   
+//   return;
+   cbfits("massresneb", nebcutlow, hmc, hdata, "massmvacorerrmod", "massmvacorerrmod", 20, 1.2, 5.0, "x", "#sigma_{m} (GeV)",3.0);
 //   
 //   cbfits("massresebnom", ebebcutlow, hmc, hdata, "masserrsmeared", "masserrsmeared", 20, 0., 3.5, "x", "#sigma_{m} (GeV)",1.0);
 //   cbfits("massresnebnom", nebcutlow, hmc, hdata, "masserrsmeared", "masserrsmeared", 20, 1.2, 5.0, "x", "#sigma_{m} (GeV)",3.0);
@@ -1286,32 +1291,64 @@ void stackplotsmva() {
 //   
 //   plotstack("sigmaEbarrelEleHighPt",hdata,hmc,"ph1.eerrmod/ph1.e",ebcut,"#sigma_{E}/E","# of events",0.0,0.02,100,true);  
 //   plotstack("sigmaEendcapEleHighPt",hdata,hmc,"ph1.eerrmod/ph1.e",eecut,"#sigma_{E}/E","# of events",0.0,0.04,100,true);  
-  
+// 
+//   
+//   return;
   plotstack("sigmaEbarrelPho100_160",tree,"ph1.eerrmod/ph1.e",ebcutlow,"#sigma_{E}/E","# of events",0.0,0.02,100,true,true);  
   plotstack("sigmaEendcapPho100_160",tree,"ph1.eerrmod/ph1.e",eecutlow,"#sigma_{E}/E","# of events",0.0,0.04,100,true,true);  
   
   plotstack("sigmaEbarrelPho160_inf",tree,"ph1.eerrmod/ph1.e",ebcut,"#sigma_{E}/E","# of events",0.0,0.02,100,true,true);  
   plotstack("sigmaEendcapPho160_inf",tree,"ph1.eerrmod/ph1.e",eecut,"#sigma_{E}/E","# of events",0.0,0.04,100,true,true);   
-  
+
+return;
+
+plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.eseed",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,200,true);
+plotstack("e55",hdata,hmc,"(!ismc)*ph1.e5x5seed/ph1.eseed + ismc*( ((ph1.e5x5seed/ph1.eseed)<=1.0)*TMath::Min(1.0,1.0022*ph1.e5x5seed/ph1.eseed) +  ((ph1.e5x5seed/ph1.eseed)>1.0)*ph1.e5x5seed/ph1.eseed )",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,200,true);
+
+plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+plotstack("e55",hdata,hmc,"((!ismc)*ph1.e5x5seed/ph1.eseed + ismc*( ((ph1.e5x5seed/ph1.eseed)<=1.0)*TMath::Min(1.0,1.0022*ph1.e5x5seed/ph1.eseed) +  ((ph1.e5x5seed/ph1.eseed)>1.0)*ph1.e5x5seed/ph1.eseed ))*ph1.eseed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+
+return;
+
+
+
+    plotstack("e55",hdata,hmc,"ph1.e3x3seed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+    plotstack("e55",hdata,hmc,"ph1.e3x3seed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+   
+   plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+   plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);   
+
+
+  plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.e3x3seed/ph1.eseed + 0.00*ismc",ebcutlow,"e55seed/eseed","# of events",0.8,1.1,100,true);
+  plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.e3x3seed/ph1.eseed + 0.00*ismc",eecutlow,"e55seed/eseed","# of events",0.8,1.1,100,true);      
+   
+   plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.eseed",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+   //plotstack("e55",hdata,hmc,"TMath::Min(1.0,(1.0+ismc*0.0016)*ph1.e5x5seed/ph1.eseed)",ebcutlow,"e55seed/eseed","# of events",0.92,1.5,100,true);
+   plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.e5x5seed/ph1.eseed",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+
+    
+plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.eseed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.eseed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);  
+   
+
+   
   return;
   
      plotstack("e55",hdata,hmc,"(1.0+ismc*0.0016)*ph1.eseed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
      plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.eseed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);  
 
   
-    plotstack("e55",hdata,hmc,"ph1.e3x3seed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
-    plotstack("e55",hdata,hmc,"ph1.e3x3seed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+;
 
   
-   plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.scrawe",ebcutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
-  
-   plotstack("e55",hdata,hmc,"ph1.e5x5seed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
+
+   
    plotstack("e55",hdata,hmc,"ph1.eseed/ph1.scrawe",eecutlow,"e55seed/eseed","# of events",0.92,1.1,100,true);
 
    return;
   
   
-   plotstack("e55",hdata,hmc,"(1.0+ismc*0.00)*ph1.e3x3seed/ph1.eseed + 0.00*ismc",ebcutlow,"e55seed/eseed","# of events",0.8,1.0,100,true);
+   
   
    plotstack("e55",hdata,hmc,"(1.0+ismc*0.0045)*ph1.e3x3seed/ph1.eseed + 0.00*ismc",ebcutlow,"e55seed/eseed","# of events",0.8,1.0,100,true);
    
