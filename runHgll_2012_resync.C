@@ -1,4 +1,4 @@
-// $Id: runHgg2011.C,v 1.1 2012/05/27 17:03:58 bendavid Exp $
+// $Id: runHgll_2012_resync.C,v 1.1 2012/10/25 21:17:46 khahn Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -29,7 +29,7 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runHgll_2012(const char *fileset    = "0000",
+void runHgll_2012_resync(const char *fileset    = "0000",
 		  const char *skim       = "noskim",
 		  const char *dataset    = "r11a-del-j16-v1",   
 		  const char *book       = "local/filefi/025",
