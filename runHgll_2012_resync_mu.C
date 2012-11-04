@@ -1,4 +1,4 @@
-// $Id: runHgg2011.C,v 1.1 2012/05/27 17:03:58 bendavid Exp $
+// $Id: runHgll_2012_resync_mu.C,v 1.1 2012/10/29 16:39:04 khahn Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -194,6 +194,8 @@ void runHgll_2012_resync_mu(const char *fileset    = "0000",
 
   myPhIdNoSmear -> SetMCSmearFactors(0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02);
 
+
+
   //  myPhIdNoSmear -> AddEnCorrPerRun(160431,167913,0.9941,0.9941,1.0004,0.9916,1.0045,1.0033,1.0082,0.9958,1.0064);//ming:Emc/Edata
   //  myPhIdNoSmear -> AddEnCorrPerRun(170000,172619,0.9954,0.9954,1.0016,0.9937,1.0066,0.9976,1.0025,0.9940,1.0046);
   //  myPhIdNoSmear -> AddEnCorrPerRun(172620,173692,0.9955,0.9955,1.0017,0.9929,1.0058,0.9986,1.0035,0.9923,1.0029);
@@ -216,6 +218,7 @@ void runHgll_2012_resync_mu(const char *fileset    = "0000",
   eegtree ->SetIsData(isData);
   eegtree ->SetGoodMuonsFromBranch( true ); 
   eegtree ->SetYear(2012); 
+  eegtree ->SetPhosphorDataFile("../../MyPhosphorDir/PHOSPHOR_NUMBERS_EXPFIT.txt");
 
   //  eegtree ->SetDoDataEleEneCorr( true );
   //  eegtree ->SetDataEleEneCorr( 1., 1. );
