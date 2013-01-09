@@ -16,12 +16,13 @@ const int numsmpoints = 81;
 //mass 
 double smmasses[numsmpoints] = {110.0,110.5,111.0,111.5,112.0,112.5,113.0,113.5,114.0,114.5,115.0,115.5,116.0,116.5,117.0,117.5,118.0,118.5,119.0,119.5,120.0,120.5,121.0,121.5,122.0,122.5,123.0,123.5,124.0,124.5,125.0,125.5,126.0,126.5,127.0,127.5,128.0,128.5,129.0,129.5,130.0,130.5,131.0,131.5,132.0,132.5,133.0,133.5,134.0,134.5,135.0,135.5,136.0,136.5,137.0,137.5,138.0,138.5,139.0,139.5,140.0,140.5,141.0,141.5,142.0,142.5,143.0,143.5,144.0,144.5,145.0,145.5,146.0,146.5,147.0,147.5,148.0,148.5,149.0,149.5,150.0};  
 
+
 //branching ratio
 double smbr[numsmpoints] = {0.00197,0.00199,0.002,0.00202,0.00204,0.00205,0.00207,0.00209,0.0021,0.00212,0.00213,0.00215,0.00216,0.00217,0.00218,0.0022,0.00221,0.00222,0.00223,0.00224,0.00225,0.00226,0.00226,0.00227,0.00228,0.00228,0.00228,0.00229,0.00229,0.00229,0.00229,0.00229,0.00229,0.00229,0.00229,0.00229,0.00228,0.00228,0.00227,0.00227,0.00226,0.00225,0.00224,0.00223,0.00222,0.00221,0.00219,0.00218,0.00217,0.00215,0.00213,0.00212,0.0021,0.00208,0.00206,0.00204,0.00202,0.002,0.00198,0.00196,0.00193,0.00191,0.00189,0.001865,0.00184,0.00181,0.00178,0.001755,0.00173,0.0017,0.00167,0.001645,0.00162,0.00159,0.00156,0.001525,0.00149,0.00146,0.00143,0.001395,0.00136};
 double ffbr[numsmpoints] = {0.059540,0.056510,0.053660,0.050980,0.048460,0.046090,0.043860,0.041760,0.039780,0.037910,0.036150,0.034490,0.032920,0.031430,0.030030,0.028710,0.027460,0.026270,0.025150,0.024080,0.023070,0.022120,0.021210,0.020340,0.019520,0.018740,0.018000,0.017300,0.016630,0.015990,0.015380,0.014800,0.014240,0.013710,0.013210,0.012720,0.012260,0.011820,0.011400,0.010990,0.010610,0.010240,0.009880,0.009539,0.009212,0.008897,0.008595,0.008305,0.008026,0.007758,0.007500,0.007251,0.007012,0.006781,0.006558,0.006344,0.006137,0.005937,0.005744,0.005557,0.005377,0.005202,0.005034,0.004870,0.004711,0.004558,0.004409,0.004264,0.004124,0.003987,0.003855,0.003725,0.003600,0.003477,0.003358,0.003241,0.003128,0.003016,0.002908,0.002801,0.002697};
 double sm4br[numsmpoints] = {4.40E-005,0.000043685,0.00004337,0.000043055,0.00004274,0.000042425,0.00004211,0.000041795,0.00004148,0.000041165,0.00004085,0.000040535,0.00004022,0.000039905,0.00003959,0.000039275,0.00003896,0.000038645,0.00003833,0.000038015,3.77E-005,0.00003717,0.00003664,0.00003611,0.00003558,0.00003505,0.00003452,0.00003399,0.00003346,0.00003293,0.0000324,0.00003187,0.00003134,0.00003081,0.00003028,0.00002975,0.00002922,0.00002869,0.00002816,0.00002763,2.71E-005,0.000026395,0.00002569,0.000024985,0.00002428,0.000023575,0.00002287,0.000022165,0.00002146,0.000020755,0.00002005,0.000019345,0.00001864,0.000017935,0.00001723,0.000016525,0.00001582,0.000015115,0.00001441,0.000013705,1.30E-005,0.000012421,0.000011842,0.000011263,0.000010684,0.000010105,0.000009526,0.000008947,0.000008368,0.000007789,0.00000721,0.000006631,0.000006052,0.000005473,0.000004894,0.000004315,0.000003736,0.000003157,0.000002578,0.000001999,1.42E-006};
 
-//cross section for different production mechanism
+//cross section for different production mechanism (OLD NUMBERS)
 double gghxsec[numsmpoints] = {
   25.0119,
   24.7918,
@@ -455,20 +456,424 @@ double wzhxsec[numsmpoints];
 double nullarray[numsmpoints];
 
 void initProcessCSArrayMap(std::map<TString,double*>& processCrossSectionMap) {
+  
+  // FIX-ME: this is a hack for now, move to use only maps ....
+  std::map<double,double> XSectionMap_ggh;
+  std::map<double,double> XSectionMap_vbf;
+  std::map<double,double> XSectionMap_wh;
+  std::map<double,double> XSectionMap_zh;
+  std::map<double,double> XSectionMap_tth;
+  
+  XSectionMap_ggh.insert(std::pair<double,double>(110.0,25.04));
+  XSectionMap_ggh.insert(std::pair<double,double>(110.5,24.82));
+  XSectionMap_ggh.insert(std::pair<double,double>(111.0,24.60));
+  XSectionMap_ggh.insert(std::pair<double,double>(111.5,24.39));
+  XSectionMap_ggh.insert(std::pair<double,double>(112.0,24.18));
+  XSectionMap_ggh.insert(std::pair<double,double>(112.5,23.97));
+  XSectionMap_ggh.insert(std::pair<double,double>(113.0,23.76));
+  XSectionMap_ggh.insert(std::pair<double,double>(113.5,23.56));
+  XSectionMap_ggh.insert(std::pair<double,double>(114.0,23.36));
+  XSectionMap_ggh.insert(std::pair<double,double>(114.5,23.16));
+  XSectionMap_ggh.insert(std::pair<double,double>(115.0,22.96));
+  XSectionMap_ggh.insert(std::pair<double,double>(115.5,22.77));
+  XSectionMap_ggh.insert(std::pair<double,double>(116.0,22.58));
+  XSectionMap_ggh.insert(std::pair<double,double>(116.5,22.39));
+  XSectionMap_ggh.insert(std::pair<double,double>(117.0,22.20));
+  XSectionMap_ggh.insert(std::pair<double,double>(117.5,22.02));
+  XSectionMap_ggh.insert(std::pair<double,double>(118.0,21.84));
+  XSectionMap_ggh.insert(std::pair<double,double>(118.5,21.66));
+  XSectionMap_ggh.insert(std::pair<double,double>(119.0,21.48));
+  XSectionMap_ggh.insert(std::pair<double,double>(119.5,21.31));
+  XSectionMap_ggh.insert(std::pair<double,double>(120.0,21.13));
+  XSectionMap_ggh.insert(std::pair<double,double>(120.5,20.96));
+  XSectionMap_ggh.insert(std::pair<double,double>(121.0,20.80));
+  XSectionMap_ggh.insert(std::pair<double,double>(121.5,20.63));
+  XSectionMap_ggh.insert(std::pair<double,double>(122.0,20.48));
+  XSectionMap_ggh.insert(std::pair<double,double>(122.5,20.31));
+  XSectionMap_ggh.insert(std::pair<double,double>(123.0,20.15));
+  XSectionMap_ggh.insert(std::pair<double,double>(123.5,19.99));
+  XSectionMap_ggh.insert(std::pair<double,double>(124.0,19.83));
+  XSectionMap_ggh.insert(std::pair<double,double>(124.5,19.68));
+  XSectionMap_ggh.insert(std::pair<double,double>(125.0,19.52));
+  XSectionMap_ggh.insert(std::pair<double,double>(125.5,19.37));
+  XSectionMap_ggh.insert(std::pair<double,double>(126.0,19.22));
+  XSectionMap_ggh.insert(std::pair<double,double>(126.5,19.07));
+  XSectionMap_ggh.insert(std::pair<double,double>(127.0,18.92));
+  XSectionMap_ggh.insert(std::pair<double,double>(127.5,18.78));
+  XSectionMap_ggh.insert(std::pair<double,double>(128.0,18.63));
+  XSectionMap_ggh.insert(std::pair<double,double>(128.5,18.49));
+  XSectionMap_ggh.insert(std::pair<double,double>(129.0,18.35));
+  XSectionMap_ggh.insert(std::pair<double,double>(129.5,18.21));
+  XSectionMap_ggh.insert(std::pair<double,double>(130.0,18.07));
+  XSectionMap_ggh.insert(std::pair<double,double>(130.5,17.94));
+  XSectionMap_ggh.insert(std::pair<double,double>(131.0,17.81));
+  XSectionMap_ggh.insert(std::pair<double,double>(131.5,17.68));
+  XSectionMap_ggh.insert(std::pair<double,double>(132.0,17.55));
+  XSectionMap_ggh.insert(std::pair<double,double>(132.5,17.42));
+  XSectionMap_ggh.insert(std::pair<double,double>(133.0,17.29));
+  XSectionMap_ggh.insert(std::pair<double,double>(133.5,17.16));
+  XSectionMap_ggh.insert(std::pair<double,double>(134.0,17.04));
+  XSectionMap_ggh.insert(std::pair<double,double>(134.5,16.92));
+  XSectionMap_ggh.insert(std::pair<double,double>(135.0,16.79));
+  XSectionMap_ggh.insert(std::pair<double,double>(135.5,16.67));
+  XSectionMap_ggh.insert(std::pair<double,double>(136.0,16.55));
+  XSectionMap_ggh.insert(std::pair<double,double>(136.5,16.43));
+  XSectionMap_ggh.insert(std::pair<double,double>(137.0,16.31));
+  XSectionMap_ggh.insert(std::pair<double,double>(137.5,16.20));
+  XSectionMap_ggh.insert(std::pair<double,double>(138.0,16.08));
+  XSectionMap_ggh.insert(std::pair<double,double>(138.5,15.96));
+  XSectionMap_ggh.insert(std::pair<double,double>(139.0,15.85));
+  XSectionMap_ggh.insert(std::pair<double,double>(139.5,15.74));
+  XSectionMap_ggh.insert(std::pair<double,double>(140.0,15.63));
+  XSectionMap_ggh.insert(std::pair<double,double>(141.0,15.42));
+  XSectionMap_ggh.insert(std::pair<double,double>(142.0,15.20));
+  XSectionMap_ggh.insert(std::pair<double,double>(143.0,15.00));
+  XSectionMap_ggh.insert(std::pair<double,double>(144.0,14.79));
+  XSectionMap_ggh.insert(std::pair<double,double>(145.0,14.59));
+  XSectionMap_ggh.insert(std::pair<double,double>(146.0,14.40));
+  XSectionMap_ggh.insert(std::pair<double,double>(147.0,14.21));
+  XSectionMap_ggh.insert(std::pair<double,double>(148.0,14.02));
+  XSectionMap_ggh.insert(std::pair<double,double>(149.0,13.83));
+  XSectionMap_ggh.insert(std::pair<double,double>(150.0,13.65));
+    
+    
+  XSectionMap_vbf.insert(std::pair<double,double>(110.0,1.809));
+  XSectionMap_vbf.insert(std::pair<double,double>(110.5,1.799));
+  XSectionMap_vbf.insert(std::pair<double,double>(111.0,1.791));
+  XSectionMap_vbf.insert(std::pair<double,double>(111.5,1.784));
+  XSectionMap_vbf.insert(std::pair<double,double>(112.0,1.780));
+  XSectionMap_vbf.insert(std::pair<double,double>(112.5,1.771));
+  XSectionMap_vbf.insert(std::pair<double,double>(113.0,1.764));
+  XSectionMap_vbf.insert(std::pair<double,double>(113.5,1.753));
+  XSectionMap_vbf.insert(std::pair<double,double>(114.0,1.743));
+  XSectionMap_vbf.insert(std::pair<double,double>(114.5,1.735));
+  XSectionMap_vbf.insert(std::pair<double,double>(115.0,1.729));
+  XSectionMap_vbf.insert(std::pair<double,double>(115.5,1.719));
+  XSectionMap_vbf.insert(std::pair<double,double>(116.0,1.714));
+  XSectionMap_vbf.insert(std::pair<double,double>(116.5,1.704));
+  XSectionMap_vbf.insert(std::pair<double,double>(117.0,1.699));
+  XSectionMap_vbf.insert(std::pair<double,double>(117.5,1.688));
+  XSectionMap_vbf.insert(std::pair<double,double>(118.0,1.683));
+  XSectionMap_vbf.insert(std::pair<double,double>(118.5,1.675));
+  XSectionMap_vbf.insert(std::pair<double,double>(119.0,1.666));
+  XSectionMap_vbf.insert(std::pair<double,double>(119.5,1.659));
+  XSectionMap_vbf.insert(std::pair<double,double>(120.0,1.649));
+  XSectionMap_vbf.insert(std::pair<double,double>(120.5,1.643));
+  XSectionMap_vbf.insert(std::pair<double,double>(121.0,1.636));
+  XSectionMap_vbf.insert(std::pair<double,double>(121.5,1.631));
+  XSectionMap_vbf.insert(std::pair<double,double>(122.0,1.623));
+  XSectionMap_vbf.insert(std::pair<double,double>(122.5,1.615));
+  XSectionMap_vbf.insert(std::pair<double,double>(123.0,1.608));
+  XSectionMap_vbf.insert(std::pair<double,double>(123.5,1.598));
+  XSectionMap_vbf.insert(std::pair<double,double>(124.0,1.595));
+  XSectionMap_vbf.insert(std::pair<double,double>(124.5,1.587));
+  XSectionMap_vbf.insert(std::pair<double,double>(125.0,1.578));
+  XSectionMap_vbf.insert(std::pair<double,double>(125.5,1.573));
+  XSectionMap_vbf.insert(std::pair<double,double>(126.0,1.568));
+  XSectionMap_vbf.insert(std::pair<double,double>(126.5,1.558));
+  XSectionMap_vbf.insert(std::pair<double,double>(127.0,1.552));
+  XSectionMap_vbf.insert(std::pair<double,double>(127.5,1.524));
+  XSectionMap_vbf.insert(std::pair<double,double>(128.0,1.540));
+  XSectionMap_vbf.insert(std::pair<double,double>(128.5,1.531));
+  XSectionMap_vbf.insert(std::pair<double,double>(129.0,1.525));
+  XSectionMap_vbf.insert(std::pair<double,double>(129.5,1.513));
+  XSectionMap_vbf.insert(std::pair<double,double>(130.0,1.511));
+  XSectionMap_vbf.insert(std::pair<double,double>(130.5,1.504));
+  XSectionMap_vbf.insert(std::pair<double,double>(131.0,1.497));
+  XSectionMap_vbf.insert(std::pair<double,double>(131.5,1.492));
+  XSectionMap_vbf.insert(std::pair<double,double>(132.0,1.485));
+  XSectionMap_vbf.insert(std::pair<double,double>(132.5,1.479));
+  XSectionMap_vbf.insert(std::pair<double,double>(133.0,1.473));
+  XSectionMap_vbf.insert(std::pair<double,double>(133.5,1.466));
+  XSectionMap_vbf.insert(std::pair<double,double>(134.0,1.462));
+  XSectionMap_vbf.insert(std::pair<double,double>(134.5,1.455));
+  XSectionMap_vbf.insert(std::pair<double,double>(135.0,1.448));
+  XSectionMap_vbf.insert(std::pair<double,double>(135.5,1.444));
+  XSectionMap_vbf.insert(std::pair<double,double>(136.0,1.436));
+  XSectionMap_vbf.insert(std::pair<double,double>(136.5,1.429));
+  XSectionMap_vbf.insert(std::pair<double,double>(137.0,1.423));
+  XSectionMap_vbf.insert(std::pair<double,double>(137.5,1.417));
+  XSectionMap_vbf.insert(std::pair<double,double>(138.0,1.412));
+  XSectionMap_vbf.insert(std::pair<double,double>(138.5,1.407));
+  XSectionMap_vbf.insert(std::pair<double,double>(139.0,1.400));
+  XSectionMap_vbf.insert(std::pair<double,double>(139.5,1.396));
+  XSectionMap_vbf.insert(std::pair<double,double>(140.0,1.389));
+  XSectionMap_vbf.insert(std::pair<double,double>(141.0,1.377));
+  XSectionMap_vbf.insert(std::pair<double,double>(142.0,1.365));
+  XSectionMap_vbf.insert(std::pair<double,double>(143.0,1.354));
+  XSectionMap_vbf.insert(std::pair<double,double>(144.0,1.344));
+  XSectionMap_vbf.insert(std::pair<double,double>(145.0,1.333));
+  XSectionMap_vbf.insert(std::pair<double,double>(146.0,1.321));
+  XSectionMap_vbf.insert(std::pair<double,double>(147.0,1.311));
+  XSectionMap_vbf.insert(std::pair<double,double>(148.0,1.302));
+  XSectionMap_vbf.insert(std::pair<double,double>(149.0,1.291));
+  XSectionMap_vbf.insert(std::pair<double,double>(150.0,1.280));
+    
+  XSectionMap_wh.insert(std::pair<double,double>(110.0,1.060));
+  XSectionMap_wh.insert(std::pair<double,double>(110.5,1.045));
+  XSectionMap_wh.insert(std::pair<double,double>(111.0,1.030));
+  XSectionMap_wh.insert(std::pair<double,double>(111.5,1.015));
+  XSectionMap_wh.insert(std::pair<double,double>(112.0,0.9998));
+  XSectionMap_wh.insert(std::pair<double,double>(112.5,0.9852));
+  XSectionMap_wh.insert(std::pair<double,double>(113.0,0.9709));
+  XSectionMap_wh.insert(std::pair<double,double>(113.5,0.9570));
+  XSectionMap_wh.insert(std::pair<double,double>(114.0,0.9432));
+  XSectionMap_wh.insert(std::pair<double,double>(114.5,0.9297));
+  XSectionMap_wh.insert(std::pair<double,double>(115.0,0.9165));
+  XSectionMap_wh.insert(std::pair<double,double>(115.5,0.9035));
+  XSectionMap_wh.insert(std::pair<double,double>(116.0,0.8907));
+  XSectionMap_wh.insert(std::pair<double,double>(116.5,0.8782));
+  XSectionMap_wh.insert(std::pair<double,double>(117.0,0.8659));
+  XSectionMap_wh.insert(std::pair<double,double>(117.5,0.8538));
+  XSectionMap_wh.insert(std::pair<double,double>(118.0,0.8420));
+  XSectionMap_wh.insert(std::pair<double,double>(118.5,0.8303));
+  XSectionMap_wh.insert(std::pair<double,double>(119.0,0.8187));
+  XSectionMap_wh.insert(std::pair<double,double>(119.5,0.8075));
+  XSectionMap_wh.insert(std::pair<double,double>(120.0,0.7966));
+  XSectionMap_wh.insert(std::pair<double,double>(120.5,0.7859));
+  XSectionMap_wh.insert(std::pair<double,double>(121.0,0.7753));
+  XSectionMap_wh.insert(std::pair<double,double>(121.5,0.7649));
+  XSectionMap_wh.insert(std::pair<double,double>(122.0,0.7547));
+  XSectionMap_wh.insert(std::pair<double,double>(122.5,0.7446));
+  XSectionMap_wh.insert(std::pair<double,double>(123.0,0.7347));
+  XSectionMap_wh.insert(std::pair<double,double>(123.5,0.7249));
+  XSectionMap_wh.insert(std::pair<double,double>(124.0,0.7154));
+  XSectionMap_wh.insert(std::pair<double,double>(124.5,0.7060));
+  XSectionMap_wh.insert(std::pair<double,double>(125.0,0.6966));
+  XSectionMap_wh.insert(std::pair<double,double>(125.5,0.6873));
+  XSectionMap_wh.insert(std::pair<double,double>(126.0,0.6782));
+  XSectionMap_wh.insert(std::pair<double,double>(126.5,0.6691));
+  XSectionMap_wh.insert(std::pair<double,double>(127.0,0.6602));
+  XSectionMap_wh.insert(std::pair<double,double>(127.5,0.6515));
+  XSectionMap_wh.insert(std::pair<double,double>(128.0,0.6429));
+  XSectionMap_wh.insert(std::pair<double,double>(128.5,0.6344));
+  XSectionMap_wh.insert(std::pair<double,double>(129.0,0.6260));
+  XSectionMap_wh.insert(std::pair<double,double>(129.5,0.6177));
+  XSectionMap_wh.insert(std::pair<double,double>(130.0,0.6095));
+  XSectionMap_wh.insert(std::pair<double,double>(130.5,0.6015));
+  XSectionMap_wh.insert(std::pair<double,double>(131.0,0.5936));
+  XSectionMap_wh.insert(std::pair<double,double>(131.5,0.5859));
+  XSectionMap_wh.insert(std::pair<double,double>(132.0,0.5783));
+  XSectionMap_wh.insert(std::pair<double,double>(132.5,0.5708));
+  XSectionMap_wh.insert(std::pair<double,double>(133.0,0.5634));
+  XSectionMap_wh.insert(std::pair<double,double>(133.5,0.5562));
+  XSectionMap_wh.insert(std::pair<double,double>(134.0,0.5491));
+  XSectionMap_wh.insert(std::pair<double,double>(134.5,0.5420));
+  XSectionMap_wh.insert(std::pair<double,double>(135.0,0.5351));
+  XSectionMap_wh.insert(std::pair<double,double>(135.5,0.5283));
+  XSectionMap_wh.insert(std::pair<double,double>(136.0,0.5215));
+  XSectionMap_wh.insert(std::pair<double,double>(136.5,0.5149));
+  XSectionMap_wh.insert(std::pair<double,double>(137.0,0.5084));
+  XSectionMap_wh.insert(std::pair<double,double>(137.5,0.5020));
+  XSectionMap_wh.insert(std::pair<double,double>(138.0,0.4956));
+  XSectionMap_wh.insert(std::pair<double,double>(138.5,0.4894));
+  XSectionMap_wh.insert(std::pair<double,double>(139.0,0.4833));
+  XSectionMap_wh.insert(std::pair<double,double>(139.5,0.4772));
+  XSectionMap_wh.insert(std::pair<double,double>(140.0,0.4713));
+  XSectionMap_wh.insert(std::pair<double,double>(141.0,0.4597));
+  XSectionMap_wh.insert(std::pair<double,double>(142.0,0.4484));
+  XSectionMap_wh.insert(std::pair<double,double>(143.0,0.4375));
+  XSectionMap_wh.insert(std::pair<double,double>(144.0,0.4268));
+  XSectionMap_wh.insert(std::pair<double,double>(145.0,0.4164));
+  XSectionMap_wh.insert(std::pair<double,double>(146.0,0.4062));
+  XSectionMap_wh.insert(std::pair<double,double>(147.0,0.3963));
+  XSectionMap_wh.insert(std::pair<double,double>(148.0,0.3867));
+  XSectionMap_wh.insert(std::pair<double,double>(149.0,0.3773));
+  XSectionMap_wh.insert(std::pair<double,double>(150.0,0.3681));
+    
+  XSectionMap_zh.insert(std::pair<double,double>(110.0,0.5869));
+  XSectionMap_zh.insert(std::pair<double,double>(110.5,0.5788));
+  XSectionMap_zh.insert(std::pair<double,double>(111.0,0.5708));
+  XSectionMap_zh.insert(std::pair<double,double>(111.5,0.5629));
+  XSectionMap_zh.insert(std::pair<double,double>(112.0,0.5552));
+  XSectionMap_zh.insert(std::pair<double,double>(112.5,0.5476));
+  XSectionMap_zh.insert(std::pair<double,double>(113.0,0.5402));
+  XSectionMap_zh.insert(std::pair<double,double>(113.5,0.5329));
+  XSectionMap_zh.insert(std::pair<double,double>(114.0,0.5258));
+  XSectionMap_zh.insert(std::pair<double,double>(114.5,0.5187));
+  XSectionMap_zh.insert(std::pair<double,double>(115.0,0.5117));
+  XSectionMap_zh.insert(std::pair<double,double>(115.5,0.5049));
+  XSectionMap_zh.insert(std::pair<double,double>(116.0,0.4981));
+  XSectionMap_zh.insert(std::pair<double,double>(116.5,0.4916));
+  XSectionMap_zh.insert(std::pair<double,double>(117.0,0.4850));
+  XSectionMap_zh.insert(std::pair<double,double>(117.5,0.4787));
+  XSectionMap_zh.insert(std::pair<double,double>(118.0,0.4724));
+  XSectionMap_zh.insert(std::pair<double,double>(118.5,0.4662));
+  XSectionMap_zh.insert(std::pair<double,double>(119.0,0.4602));
+  XSectionMap_zh.insert(std::pair<double,double>(119.5,0.4542));
+  XSectionMap_zh.insert(std::pair<double,double>(120.0,0.4483));
+  XSectionMap_zh.insert(std::pair<double,double>(120.5,0.4426));
+  XSectionMap_zh.insert(std::pair<double,double>(121.0,0.4368));
+  XSectionMap_zh.insert(std::pair<double,double>(121.5,0.4312));
+  XSectionMap_zh.insert(std::pair<double,double>(122.0,0.4257));
+  XSectionMap_zh.insert(std::pair<double,double>(122.5,0.4203));
+  XSectionMap_zh.insert(std::pair<double,double>(123.0,0.4150));
+  XSectionMap_zh.insert(std::pair<double,double>(123.5,0.4096));
+  XSectionMap_zh.insert(std::pair<double,double>(124.0,0.4044));
+  XSectionMap_zh.insert(std::pair<double,double>(124.5,0.3993));
+  XSectionMap_zh.insert(std::pair<double,double>(125.0,0.3943));
+  XSectionMap_zh.insert(std::pair<double,double>(125.5,0.3893));
+  XSectionMap_zh.insert(std::pair<double,double>(126.0,0.3843));
+  XSectionMap_zh.insert(std::pair<double,double>(126.5,0.3794));
+  XSectionMap_zh.insert(std::pair<double,double>(127.0,0.3746));
+  XSectionMap_zh.insert(std::pair<double,double>(127.5,0.3699));
+  XSectionMap_zh.insert(std::pair<double,double>(128.0,0.3652));
+  XSectionMap_zh.insert(std::pair<double,double>(128.5,0.3606));
+  XSectionMap_zh.insert(std::pair<double,double>(129.0,0.3561));
+  XSectionMap_zh.insert(std::pair<double,double>(129.5,0.3516));
+  XSectionMap_zh.insert(std::pair<double,double>(130.0,0.3473));
+  XSectionMap_zh.insert(std::pair<double,double>(130.5,0.3430));
+  XSectionMap_zh.insert(std::pair<double,double>(131.0,0.3388));
+  XSectionMap_zh.insert(std::pair<double,double>(131.5,0.3347));
+  XSectionMap_zh.insert(std::pair<double,double>(132.0,0.3306));
+  XSectionMap_zh.insert(std::pair<double,double>(132.5,0.3266));
+  XSectionMap_zh.insert(std::pair<double,double>(133.0,0.3226));
+  XSectionMap_zh.insert(std::pair<double,double>(133.5,0.3188));
+  XSectionMap_zh.insert(std::pair<double,double>(134.0,0.3149));
+  XSectionMap_zh.insert(std::pair<double,double>(134.5,0.3112));
+  XSectionMap_zh.insert(std::pair<double,double>(135.0,0.3074));
+  XSectionMap_zh.insert(std::pair<double,double>(135.5,0.3038));
+  XSectionMap_zh.insert(std::pair<double,double>(136.0,0.3001));
+  XSectionMap_zh.insert(std::pair<double,double>(136.5,0.2966));
+  XSectionMap_zh.insert(std::pair<double,double>(137.0,0.2930));
+  XSectionMap_zh.insert(std::pair<double,double>(137.5,0.2895));
+  XSectionMap_zh.insert(std::pair<double,double>(138.0,0.2861));
+  XSectionMap_zh.insert(std::pair<double,double>(138.5,0.2827));
+  XSectionMap_zh.insert(std::pair<double,double>(139.0,0.2793));
+  XSectionMap_zh.insert(std::pair<double,double>(139.5,0.2760));
+  XSectionMap_zh.insert(std::pair<double,double>(140.0,0.2728));
+  XSectionMap_zh.insert(std::pair<double,double>(141.0,0.2664));
+  XSectionMap_zh.insert(std::pair<double,double>(142.0,0.2601));
+  XSectionMap_zh.insert(std::pair<double,double>(143.0,0.2541));
+  XSectionMap_zh.insert(std::pair<double,double>(144.0,0.2482));
+  XSectionMap_zh.insert(std::pair<double,double>(145.0,0.2424));
+  XSectionMap_zh.insert(std::pair<double,double>(146.0,0.2368));
+  XSectionMap_zh.insert(std::pair<double,double>(147.0,0.2314));
+  XSectionMap_zh.insert(std::pair<double,double>(148.0,0.2261));
+  XSectionMap_zh.insert(std::pair<double,double>(149.0,0.2209));
+  XSectionMap_zh.insert(std::pair<double,double>(150.0,0.2159));
+    
+  XSectionMap_tth.insert(std::pair<double,double>(110.0,0.1887));
+  XSectionMap_tth.insert(std::pair<double,double>(110.5,0.1863));
+  XSectionMap_tth.insert(std::pair<double,double>(111.0,0.1840));
+  XSectionMap_tth.insert(std::pair<double,double>(111.5,0.1816));
+  XSectionMap_tth.insert(std::pair<double,double>(112.0,0.1793));
+  XSectionMap_tth.insert(std::pair<double,double>(112.5,0.1771));
+  XSectionMap_tth.insert(std::pair<double,double>(113.0,0.1748));
+  XSectionMap_tth.insert(std::pair<double,double>(113.5,0.1727));
+  XSectionMap_tth.insert(std::pair<double,double>(114.0,0.1705));
+  XSectionMap_tth.insert(std::pair<double,double>(114.5,0.1684));
+  XSectionMap_tth.insert(std::pair<double,double>(115.0,0.1663));
+  XSectionMap_tth.insert(std::pair<double,double>(115.5,0.1642));
+  XSectionMap_tth.insert(std::pair<double,double>(116.0,0.1622));
+  XSectionMap_tth.insert(std::pair<double,double>(116.5,0.1602));
+  XSectionMap_tth.insert(std::pair<double,double>(117.0,0.1582));
+  XSectionMap_tth.insert(std::pair<double,double>(117.5,0.1563));
+  XSectionMap_tth.insert(std::pair<double,double>(118.0,0.1543));
+  XSectionMap_tth.insert(std::pair<double,double>(118.5,0.1524));
+  XSectionMap_tth.insert(std::pair<double,double>(119.0,0.1506));
+  XSectionMap_tth.insert(std::pair<double,double>(119.5,0.1487));
+  XSectionMap_tth.insert(std::pair<double,double>(120.0,0.1470));
+  XSectionMap_tth.insert(std::pair<double,double>(120.5,0.1452));
+  XSectionMap_tth.insert(std::pair<double,double>(121.0,0.1434));
+  XSectionMap_tth.insert(std::pair<double,double>(121.5,0.1417));
+  XSectionMap_tth.insert(std::pair<double,double>(122.0,0.1400));
+  XSectionMap_tth.insert(std::pair<double,double>(122.5,0.1383));
+  XSectionMap_tth.insert(std::pair<double,double>(123.0,0.1366));
+  XSectionMap_tth.insert(std::pair<double,double>(123.5,0.1350));
+  XSectionMap_tth.insert(std::pair<double,double>(124.0,0.1334));
+  XSectionMap_tth.insert(std::pair<double,double>(124.5,0.1318));
+  XSectionMap_tth.insert(std::pair<double,double>(125.0,0.1302));
+  XSectionMap_tth.insert(std::pair<double,double>(125.5,0.1287));
+  XSectionMap_tth.insert(std::pair<double,double>(126.0,0.1271));
+  XSectionMap_tth.insert(std::pair<double,double>(126.5,0.1256));
+  XSectionMap_tth.insert(std::pair<double,double>(127.0,0.1241));
+  XSectionMap_tth.insert(std::pair<double,double>(127.5,0.1227));
+  XSectionMap_tth.insert(std::pair<double,double>(128.0,0.1212));
+  XSectionMap_tth.insert(std::pair<double,double>(128.5,0.1198));
+  XSectionMap_tth.insert(std::pair<double,double>(129.0,0.1184));
+  XSectionMap_tth.insert(std::pair<double,double>(129.5,0.1170));
+  XSectionMap_tth.insert(std::pair<double,double>(130.0,0.1157));
+  XSectionMap_tth.insert(std::pair<double,double>(130.5,0.1143));
+  XSectionMap_tth.insert(std::pair<double,double>(131.0,0.1130));
+  XSectionMap_tth.insert(std::pair<double,double>(131.5,0.1117));
+  XSectionMap_tth.insert(std::pair<double,double>(132.0,0.1104));
+  XSectionMap_tth.insert(std::pair<double,double>(132.5,0.1091));
+  XSectionMap_tth.insert(std::pair<double,double>(133.0,0.1079));
+  XSectionMap_tth.insert(std::pair<double,double>(133.5,0.1067));
+  XSectionMap_tth.insert(std::pair<double,double>(134.0,0.1054));
+  XSectionMap_tth.insert(std::pair<double,double>(134.5,0.1042));
+  XSectionMap_tth.insert(std::pair<double,double>(135.0,0.1031));
+  XSectionMap_tth.insert(std::pair<double,double>(135.5,0.1019));
+  XSectionMap_tth.insert(std::pair<double,double>(136.0,0.1007));
+  XSectionMap_tth.insert(std::pair<double,double>(136.5,0.09961));
+  XSectionMap_tth.insert(std::pair<double,double>(137.0,0.09849));
+  XSectionMap_tth.insert(std::pair<double,double>(137.5,0.09738));
+  XSectionMap_tth.insert(std::pair<double,double>(138.0,0.09629));
+  XSectionMap_tth.insert(std::pair<double,double>(138.5,0.09521));
+  XSectionMap_tth.insert(std::pair<double,double>(139.0,0.09415));
+  XSectionMap_tth.insert(std::pair<double,double>(139.5,0.09310));
+  XSectionMap_tth.insert(std::pair<double,double>(140.0,0.09207));
+  XSectionMap_tth.insert(std::pair<double,double>(141.0,0.09004));
+  XSectionMap_tth.insert(std::pair<double,double>(142.0,0.08807));
+  XSectionMap_tth.insert(std::pair<double,double>(143.0,0.08615));
+  XSectionMap_tth.insert(std::pair<double,double>(144.0,0.08427));
+  XSectionMap_tth.insert(std::pair<double,double>(145.0,0.08246));
+  XSectionMap_tth.insert(std::pair<double,double>(146.0,0.08068));
+  XSectionMap_tth.insert(std::pair<double,double>(147.0,0.07895));
+  XSectionMap_tth.insert(std::pair<double,double>(148.0,0.07727));
+  XSectionMap_tth.insert(std::pair<double,double>(149.0,0.07563));
+  XSectionMap_tth.insert(std::pair<double,double>(150.0,0.07403));
+    
+    
+  for(int i=0; i<numsmpoints; ++i) {
+    double mass = 110. + i*0.5;
+    if (mass < 140. || mass == (double)(int)mass) {
+
+/*       std::cout<<" assignig CS for mass "<<mass<<" normaly  as "<<XSectionMap_ggh[mass]<<std::endl; */
+/*       std::cout<<"                                             "<<XSectionMap_vbf[mass]<<std::endl; */
+/*       std::cout<<"                                             "<<XSectionMap_wh[mass]<<std::endl; */
+/*       std::cout<<"                                             "<<XSectionMap_zh[mass]<<std::endl; */
+/*       std::cout<<"                                             "<<XSectionMap_tth[mass]<<std::endl; */
+
+      gghxsec[i] = XSectionMap_ggh[mass];
+      vbfxsec[i] = XSectionMap_vbf[mass];
+      whxsec [i] = XSectionMap_wh[mass];
+      zhxsec [i] = XSectionMap_zh[mass];
+      tthxsec[i] = XSectionMap_tth[mass];
+    } else {
+
+/*       std::cout<<"  injterpolated CS for mass = "<<mass<<" is "<<(XSectionMap_ggh[mass-0.5]+XSectionMap_ggh[mass+0.5])/2.<<std::endl; */
+/*       std::cout<<"                                            "<<(XSectionMap_vbf[mass-0.5]+XSectionMap_vbf[mass+0.5])/2.<<std::endl; */
+/*       std::cout<<"                                            "<<(XSectionMap_wh [mass-0.5]+XSectionMap_wh [mass+0.5])/2.<<std::endl; */
+/*       std::cout<<"                                            "<<(XSectionMap_zh [mass-0.5]+XSectionMap_zh [mass+0.5])/2.<<std::endl; */
+/*       std::cout<<"                                            "<<(XSectionMap_tth[mass-0.5]+XSectionMap_tth[mass+0.5])/2.<<std::endl; */
+
+      gghxsec[i] = (XSectionMap_ggh[mass-0.5]+XSectionMap_ggh[mass+0.5])/2.;
+      vbfxsec[i] = (XSectionMap_vbf[mass-0.5]+XSectionMap_vbf[mass+0.5])/2.;
+      whxsec [i] = (XSectionMap_wh [mass-0.5]+XSectionMap_wh [mass+0.5])/2.;
+      zhxsec [i] = (XSectionMap_zh [mass-0.5]+XSectionMap_zh [mass+0.5])/2.;
+      tthxsec[i] = (XSectionMap_tth[mass-0.5]+XSectionMap_tth[mass+0.5])/2.;
+    }
+  }
+    
+    
+  for(int i=0; i<numsmpoints; ++i) {
+    wzhxsec[i] = (whxsec[i] + zhxsec[i]);
+    //tthxsec[i] = tthxsec[i];
+
+    // interference with 2photon BG, -2.5% on CS in all masses on GF process
+    gghxsec[i] = 0.975 * gghxsec[i];
+  }
 
   processCrossSectionMap.insert(std::pair<TString,double*>("gghxsec",gghxsec));
   processCrossSectionMap.insert(std::pair<TString,double*>("sm4gghxsec",sm4gghxsec));
   processCrossSectionMap.insert(std::pair<TString,double*>("vbfxsec",vbfxsec));
-
-  for(int i=0; i<numsmpoints; ++i) {
-    wzhxsec[i] = (whxsec[i] + zhxsec[i]);
-    tthxsec[i] = tthxsec[i];
-  }
-
+  
   processCrossSectionMap.insert(std::pair<TString,double*>("wzhxsec",wzhxsec));
-	
+  
   processCrossSectionMap.insert(std::pair<TString,double*>("tthxsec",tthxsec));
-
+  
   processCrossSectionMap.insert(std::pair<TString,double*>("smbr",smbr));
   processCrossSectionMap.insert(std::pair<TString,double*>("ffbr",ffbr));
   processCrossSectionMap.insert(std::pair<TString,double*>("sm4br",sm4br));
