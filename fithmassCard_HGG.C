@@ -658,6 +658,7 @@ bool readConfigCardNuissances(TString configCardName, int numCats,
 			      std::vector<RooAbsReal*>& nsigcatModel,
 			      std::vector<RooAbsReal*>& nuissances,
 			      std::vector<RooAbsReal*>& finalnorm,
+			      std::vector<RooAbsReal*>& finalnorm_2nd,
 			      std::vector<RooAbsReal*>& finalnormModel,
 			      std::vector<TString>      catnames);
 
@@ -749,9 +750,9 @@ RooDataSet *makedset(TString name, TTree *tree, TCut cut, RooRealVar *hmass, Roo
 
 //void createSignalModels(TString configCardName="mettag.config", modeltype model = STANDARDMODEL) {
 void fithmassCard_HGG(bool fitonly        = false, 
-		      bool doeffsigma     = false,
-		      bool doeffsmear     = false,
-		      bool doSecondSignal = true,
+		      bool doeffsigma     = true,
+		      bool doeffsmear     = true,
+		      bool doSecondSignal = false,
 		      TString baseString  = "moriond13",
 #ifdef DOBDT
 		      //TString configCardName="/home/fabstoec/cms/root/templateHGG_8TeV_Moriond.config") {
@@ -2049,6 +2050,15 @@ void fithmassCard_HGG(bool fitonly        = false,
 	  sigmaslidesG_wv[iCat] = new RooFormulaVar*[gCounter-1];
 	  fracslides_wv[iCat]   = new RooFormulaVar*[gCounter-1];
 	  gslides_wv[iCat]      = new RooGaussian*[gCounter-1];
+
+
+	  if (doSecondSignal) {
+	    meanslidesG_wv_2nd[iCat]  = new RooFormulaVar*[gCounter-1];
+	    sigmaslidesG_wv_2nd[iCat] = new RooFormulaVar*[gCounter-1];
+	    fracslides_wv_2nd[iCat]   = new RooFormulaVar*[gCounter-1];
+	    gslides_wv_2nd[iCat]      = new RooGaussian*[gCounter-1];
+	  }
+
 	  // ============= BEGIN effective smearing ==============
 	  gslidesModel_wv[iCat]      = new RooGaussian*[gCounter-1];
 	  // =====================================================
@@ -2057,6 +2067,14 @@ void fithmassCard_HGG(bool fitonly        = false,
 	  sigmaslidesG_rv[iCat] = new RooFormulaVar*[gCounter-1];
 	  fracslides_rv[iCat]   = new RooFormulaVar*[gCounter-1];
 	  gslides_rv[iCat]      = new RooGaussian*[gCounter-1];
+
+	  if (doSecondSignal) {
+	    meanslidesG_rv_2nd[iCat]  = new RooFormulaVar*[gCounter-1];
+	    sigmaslidesG_rv_2nd[iCat] = new RooFormulaVar*[gCounter-1];
+	    fracslides_rv_2nd[iCat]   = new RooFormulaVar*[gCounter-1];
+	    gslides_rv_2nd[iCat]      = new RooGaussian*[gCounter-1];
+	  }
+
 	  // ============= BEGIN effective smearing ==============
 	  gslidesModel_rv[iCat]      = new RooGaussian*[gCounter-1];
 	  // =====================================================
@@ -2118,7 +2136,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 	    gslides_wv[iCat][gCounter-1] = new RooGaussian(slideName.Data(),"",*hmass,*(meanslidesG_wv[iCat][gCounter-1]),*(sigmaslidesG_wv[iCat][gCounter-1]));
 	  else
 	    gslides_rv[iCat][gCounter-1] = new RooGaussian(slideName.Data(),"",*hmass,*(meanslidesG_rv[iCat][gCounter-1]),*(sigmaslidesG_rv[iCat][gCounter-1]));
-
+	  
 	  // ============== BEGIN effective smearing ======================
 	  slideName=TString::Format("gslideModel%d%s%s",gCounter,catnames.at(iCat).Data(),vtxString.Data());
 	  if( iVtx ) {
@@ -2128,7 +2146,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 	    gslidesModel_rv[iCat][gCounter-1] = new RooGaussian(slideName.Data(),"",*hmass2,*(meanslidesG_rv[iCat][gCounter-1]),*(sigmaslidesG_rv[iCat][gCounter-1]));
 	    compListModel.add(* (gslidesModel_rv[iCat][gCounter-1]) );
 	  }
-
+	  
 	  // ==============================================================
 	  
 	  compList.add( (iVtx ? ( *(gslides_wv[iCat][gCounter-1]) ): ( *(gslides_rv[iCat][gCounter-1]) )));
@@ -2136,7 +2154,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 	  // ========================================================================
 	  // models fro second Higgs as BG
 	  if( doSecondSignal ) {
-
+	    
 	    slideName=TString::Format("meanslideG%d%s%s_2nd",gCounter,catnames.at(iCat).Data(),vtxString.Data());
 	    parName  =TString::Format("dmG%d_%s_%s_%s",gCounter,vtxString.Data(),procname.Data(),catnamesbase[iCat].Data());
 	    pair = fitparmfuncs2nd[iCat].find( parName );
@@ -2177,16 +2195,16 @@ void fithmassCard_HGG(bool fitonly        = false,
 		fracList_2nd.add(* (fracslides_rv_2nd[iCat][gCounter-1]) );
 	      }
 	    }
-	  
+	    
 	    slideName=TString::Format("gslide%d%s%s_2nd",gCounter,catnames.at(iCat).Data(),vtxString.Data());
 	    if( iVtx )
 	      gslides_wv_2nd[iCat][gCounter-1] = new RooGaussian(slideName.Data(),"",*hmass,*(meanslidesG_wv_2nd[iCat][gCounter-1]),*(sigmaslidesG_wv_2nd[iCat][gCounter-1]));
 	    else
 	      gslides_rv_2nd[iCat][gCounter-1] = new RooGaussian(slideName.Data(),"",*hmass,*(meanslidesG_rv_2nd[iCat][gCounter-1]),*(sigmaslidesG_rv_2nd[iCat][gCounter-1]));
-	  
+	    
 	    compList_2nd.add( (iVtx ? ( *(gslides_wv_2nd[iCat][gCounter-1]) ): ( *(gslides_rv_2nd[iCat][gCounter-1]) )));
 	  }
-
+	  
 	  // go to next Gaussian...
 	  gCounter++;
 	  gIt   = fitparms[iCat].find( TString::Format("dmG%d_",gCounter) + vtxString +TString("_") + procname +TString("_")+catnamesbase[iCat]);
@@ -2199,7 +2217,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 	  combhslides_rv[iCat]      = new RooAddPdf(TString("combhslide")+catnames.at(iCat)+TString("_rv"),"",compList,fracList,true);
 	  combhslidesModel_rv[iCat] = new RooAddPdf(TString("combhslideModel")+catnames.at(iCat)+TString("_rv"),"",compListModel,fracList,true);
 	}
-
+	
 	if( doSecondSignal ) {
 	  if ( iVtx  )
 	    combhslides_wv_2nd[iCat]      = new RooAddPdf(TString("combhslide")+catnames.at(iCat)+TString("_wv_2nd"),"",compList_2nd,fracList_2nd,true);
@@ -2294,6 +2312,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 				      nsigcatsModel,
 				      addNuissance,
 				      finalnormslides,
+				      finalnormslides_2nd,
 				      finalnormslidesModel,
 				      catnames);
 
@@ -3057,6 +3076,7 @@ bool readConfigCardNuissances(TString configCardName, int numCats,
 			      std::vector<RooAbsReal*>& nsigcatModel,
 			      std::vector<RooAbsReal*>& nuissances,
 			      std::vector<RooAbsReal*>& finalnorm,
+			      std::vector<RooAbsReal*>& finalnorm_2nd,
 			      std::vector<RooAbsReal*>& finalnormModel,
 			      std::vector<TString> catnames) {
   
@@ -3098,12 +3118,14 @@ bool readConfigCardNuissances(TString configCardName, int numCats,
       if( sscanf(line,"NSIG %d %d %s %s",&catInd,&nParms, formula, parList) ) {
 	// need to transform the parList...
 	RooArgList theList;
+	RooArgList theList_2nd;
 	RooArgList theListModel;
 	if( !strcmp(formula,"DEFAULT") ) {	 
 	  theList.add( *(finalnorm[catInd]) );
+	  theList_2nd.add( *(finalnorm_2nd[catInd]) );
 	  theListModel.add( *(finalnormModel[catInd]) );
 	  nsigcat     [catInd] = new RooFormulaVar(TString::Format("nsig%s",catnames.at(catInd).Data()),"","@0",theList);
-	  nsigcat_2nd [catInd] = new RooFormulaVar(TString::Format("nsig2nd%s",catnames.at(catInd).Data()),"","@0",theList);
+	  nsigcat_2nd [catInd] = new RooFormulaVar(TString::Format("nsig2nd%s",catnames.at(catInd).Data()),"","@0",theList_2nd);
 	  nsigcatModel[catInd] = new RooFormulaVar(TString::Format("nsigModel%s",catnames.at(catInd).Data()),"","@0",theListModel);
 	} else {	
 	  std::string parStr(parList);
@@ -3114,9 +3136,11 @@ bool readConfigCardNuissances(TString configCardName, int numCats,
 	    int idx = -1;
 	    if ( sscanf(thisPar.c_str(),"NUIS(%d)",&idx) ) {
 	      theList.add(* (nuissances[idx]) );
+	      theList_2nd.add(* (nuissances[idx]) );
 	      theListModel.add(* (nuissances[idx]) );
 	    } else if ( sscanf(thisPar.c_str(),"NOMINAL(%d)",&idx) ) {
 	      theList.add(* (finalnorm[idx]) );
+	      theList_2nd.add(* (finalnorm_2nd[idx]) );
 	      theListModel.add(* (finalnormModel[idx]) );
 	    } else {
 	      std::cerr<<" ERROR: Cannot recognize Par Type "<<thisPar.c_str()<<"."<<std::endl;
@@ -3130,9 +3154,11 @@ bool readConfigCardNuissances(TString configCardName, int numCats,
 	  int idx = -1;
 	  if ( sscanf(lastPar.c_str(),"NUIS(%d)",&idx) ) {
 	    theList.add(* (nuissances[idx]) );
+	    theList_2nd.add(* (nuissances[idx]) );
 	    theListModel.add(* (nuissances[idx]) );
 	  } else if ( sscanf(lastPar.c_str(),"NOMINAL(%d)",&idx) ) {
 	    theList.add(* (finalnorm[idx]) );
+	    theList_2nd.add(* (finalnorm_2nd[idx]) );
 	    theListModel.add(* (finalnormModel[idx]) );
 	  }  else {
 	    std::cerr<<" ERROR: Cannot recognize Par Type "<<lastPar.c_str()<<"."<<std::endl;

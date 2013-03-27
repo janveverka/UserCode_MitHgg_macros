@@ -26,17 +26,28 @@ public:
   virtual void resetValues();
   virtual void storeValues();
   virtual RooAbsPdf* getPdf();
-  
+
+  void createDerivative();
+  RooAbsPdf* getDer() { return _thePdf_der; };
+
 private:
 
   RooRealVar*      _theMass;
 
   int _enum;
   int _order;
+
+  TString _base;
+  TString _base2;
   
   RooBernstein*       _thePdf;
+  RooBernstein*       _thePdf_der;
   
-  RooConstVar*     _bernconstvar;
+  RooConstVar*      _bernconstvar;
+
+  RooConstVar**     _bernval_der;
+  RooArgList*       _bernval_der_list;
+
   RooRealVar**     _bernval;
   RooFormulaVar**  _bernvalsq;
   RooArgList*      _bernval_list;
@@ -45,7 +56,7 @@ private:
 };
 
 fstBernModel::fstBernModel(RooRealVar* mass, int order, int number, TString base, TString base2):
-  _theMass(mass), _enum(number), _order(order) {
+  _theMass(mass), _enum(number), _order(order), _base(base), _base2(base2) {
   
   // second order polinomial
   _bernval       = new RooRealVar    *[_order];
@@ -63,8 +74,7 @@ fstBernModel::fstBernModel(RooRealVar* mass, int order, int number, TString base
 
   _bernval_list->add(*_bernconstvar);
 
-
-  for(int iOrder = 0; iOrder < _order; ++iOrder) {
+  for(int iOrder = 0; iOrder < _order; ++iOrder) { 
     pSS_bernName.str("");
     pSS_bernName << "CMS_"<<base2.Data()<<"_" << base.Data() << "_p" << (iOrder+1);
     _bernval[iOrder] = new RooRealVar(pSS_bernName.str().c_str(),"",-10.,10);
@@ -85,6 +95,34 @@ fstBernModel::fstBernModel(RooRealVar* mass, int order, int number, TString base
 
   pSS_bernName << "CMS_"<<base2.Data()<<"_" << base.Data() << "_bkgshape";
  _thePdf  = new RooBernstein(pSS_bernName.str().c_str(),"",*_theMass, *_bernval_list);
+
+  return;
+}
+
+void fstBernModel::createDerivative() {
+
+  stringstream pSS_bernName;  
+  pSS_bernName.str("");
+  pSS_bernName << "fstbern_bernval_der_list_" << _base.Data() << "_" << _enum;
+  _bernval_der_list = new RooArgList(pSS_bernName.str().c_str());  
+
+  for(int iOrder = 0; iOrder < _order; ++iOrder) {
+
+    pSS_bernName.str("");
+    pSS_bernName << "CMS_"<<_base2.Data()<<"_" << _base.Data() << "_p_der_" << (iOrder+1);
+
+    double tmpVal = TMath::Power(_bernval[iOrder]->getVal(),2);
+    tmpVal -= ( iOrder == 0 ? 1 : TMath::Power(_bernval[iOrder-1]->getVal(),2) );
+
+    _bernval_der[iOrder] = new RooConstVar(pSS_bernName.str().c_str(),"", tmpVal);
+
+    _bernval_der_list -> add(*_bernval_der[iOrder]);
+  }
+  
+  pSS_bernName.str("");
+
+  pSS_bernName << "CMS_"<<_base2.Data()<<"_" << _base.Data() << "_bkgshape_der";
+  _thePdf_der  = new RooBernstein(pSS_bernName.str().c_str(),"",*_theMass, *_bernval_der_list);
   
   return;
 }

@@ -59,64 +59,66 @@ using namespace RooFit;
 
 #include "FstModels.h"     // some helpfer functions for different models (well... I cut away all but Bernstein, but can be brought back...)
 
-RooDataSet *makedset(TString name, TTree *tree, TCut cut, RooRealVar *hmass, RooRealVar* sbweight = NULL, Double_t tWeight = 1.,
-		     std::map<int,std::map<int,std::vector<int>*>*>* eventMap = NULL,
-		     int* numSkipped = NULL) {
+// RooDataSet *makedset(TString name, TTree *tree, TCut cut, RooRealVar *hmass, RooRealVar* sbweight = NULL, Double_t tWeight = 1.,
+// 		     std::map<int,std::map<int,std::vector<int>*>*>* eventMap = NULL,
+// 		     int* numSkipped = NULL) {
   
-  RooDataSet *dset = NULL;
-  if( sbweight )
-    dset = new RooDataSet(name,"",RooArgSet(*hmass,*sbweight),"sbweight");
-  else
-    dset = new RooDataSet(name,"",RooArgSet(*hmass));
+//   RooDataSet *dset = NULL;
+//   if( sbweight )
+//     dset = new RooDataSet(name,"",RooArgSet(*hmass,*sbweight),"sbweight");
+//   else
+//     dset = new RooDataSet(name,"",RooArgSet(*hmass));
   
-  RooRealVar *vset = (RooRealVar*)dset->get()->find(hmass->GetName());
+//   RooRealVar *vset = (RooRealVar*)dset->get()->find(hmass->GetName());
   
 
-  std::cout<<"  ======================================= "<<std::endl;
-  std::cout<<"  "<<cut<<std::endl;
+//   std::cout<<"  ======================================= "<<std::endl;
+//   std::cout<<"  "<<cut<<std::endl;
 
-  tree->SetEstimate(tree->GetEntries());
+//   tree->SetEstimate(tree->GetEntries());
 
-  Int_t nev = tree->Draw("mass:run:lumi:evt",cut,"goff");    
-  std::cout<<"  Nev = "<<nev<<std::endl;
+//   Int_t nev = tree->Draw("mass:run:lumi:evt",cut,"goff");    
+//   std::cout<<"  Nev = "<<nev<<std::endl;
 
-  double *vals  = tree->GetV1();
-  double *runs  = tree->GetV2();
-  double *lumis = tree->GetV3();
-  double *evts  = tree->GetV4();
-  //double *weights = tree->GetW();  // this is Data, has no weights.
+//   double *vals  = tree->GetV1();
+//   double *runs  = tree->GetV2();
+//   double *lumis = tree->GetV3();
+//   double *evts  = tree->GetV4();
+//   //double *weights = tree->GetW();  // this is Data, has no weights.
   
-  for (int iev=0; iev<nev; ++iev) {
-    vset->setVal(vals[iev]);
+//   for (int iev=0; iev<nev; ++iev) {
+//     vset->setVal(vals[iev]);
 
-    bool noskip = true;  // if false, we skip event
-    if ( eventMap ) {  // remove events in the map
+//     bool noskip = true;  // if false, we skip event
+//     if ( eventMap ) {  // remove events in the map
       
-      noskip = ( eventMap->find( (int) runs[iev] ) == eventMap->end() || 
-		 eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) == eventMap->find( (int) runs[iev] ) ->second ->end() );
-      if ( !noskip ){
-	noskip = true;
-	for(std::vector<int>::iterator it = eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->begin(); 
-	    it != eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->end(); ++it ){
-	  if (evts[iev] == (*it)) {
-	    noskip = false;
-	    if(numSkipped) (*numSkipped)++;
-	    std::cout<<" BAD ECAL Laser List: Skipping event "<<runs[iev]<<"  "<<lumis[iev]<<"  "<<evts[iev]<<std::endl;
-	    break;
-	  }
-	}
-      }
-    }
+//       noskip = ( eventMap->find( (int) runs[iev] ) == eventMap->end() || 
+// 		 eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) == eventMap->find( (int) runs[iev] ) ->second ->end() );
+//       if ( !noskip ){
+// 	noskip = true;
+// 	for(std::vector<int>::iterator it = eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->begin(); 
+// 	    it != eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->end(); ++it ){
+// 	  if (evts[iev] == (*it)) {
+// 	    noskip = false;
+// 	    if(numSkipped) (*numSkipped)++;
+// 	    std::cout<<" BAD ECAL Laser List: Skipping event "<<runs[iev]<<"  "<<lumis[iev]<<"  "<<evts[iev]<<std::endl;
+// 	    break;
+// 	  }
+// 	}
+//       }
+//     }
       
-    if (noskip)
-      dset->add(RooArgSet(*vset),tWeight);
-  }
+//     if (noskip)
+//       dset->add(RooArgSet(*vset),tWeight);
+//   }
   
-  return dset;
+//   return dset;
   
-}
+// }
 
 RooDataSet *makedset(TString name, TTree **trees, int numTrees, TCut cut, RooRealVar *hmass, RooRealVar* sbweight = NULL, Double_t tWeight = 1.,
+		     int catCounter = -1,
+		     bool dumpEvents = false,
 		     std::map<int,std::map<int,std::vector<int>*>*>* eventMap = NULL,
 		     int* numSkipped = NULL) {
   
@@ -140,12 +142,130 @@ RooDataSet *makedset(TString name, TTree **trees, int numTrees, TCut cut, RooRea
     Int_t nev = tree->Draw("mass:run:lumi:evt",cut,"goff");    
     std::cout<<"  Nev = "<<nev<<std::endl;
 
-    double *vals  = tree->GetV1();
-    double *runs  = tree->GetV2();
-    double *lumis = tree->GetV3();
-    double *evts  = tree->GetV4();
+    double *vals  = NULL;
+    double *runs  = NULL;
+    double *lumis = NULL;
+    double *evts  = NULL;
     //double *weights = tree->GetW();  // this is Data, has no weights.
+
+    double* rhos     = NULL;
+    double* nvtx     = NULL;
+    double* bdt      = NULL;
+    
+    double* ph1pt    = NULL;
+    double* ph1sceta = NULL;
+    double* ph1idmva = NULL;
+    double* ph1r9    = NULL;
+    
+    double* ph2pt    = NULL;
+    double* ph2sceta = NULL;
+    double* ph2idmva = NULL;
+    double* ph2r9    = NULL;
+    
+
+    double* cosDphi  = NULL;
+    double* sigMoM   = NULL;
+    double* sigMoM_wv= NULL;
+    double* pvtx     = NULL;
+
   
+    if( dumpEvents ) {
+      vals  = new double[nev];
+      runs  = new double[nev];
+      lumis = new double[nev];
+      evts  = new double[nev];
+
+      double* tmp1 = tree->GetV1();
+      double* tmp2 = tree->GetV2();
+      double* tmp3 = tree->GetV3();
+      double* tmp4 = tree->GetV4();
+
+      for (int iev=0; iev<nev; ++iev) {
+	vals[iev] = tmp1[iev];
+	runs[iev] = tmp2[iev];
+	lumis[iev] = tmp3[iev];
+	evts[iev] = tmp4[iev];
+      }
+
+
+      rhos     = new double[nev];
+      nvtx     = new double[nev];
+      bdt      = new double[nev];
+      
+      ph1pt    = new double[nev];
+      ph1sceta = new double[nev];
+      ph1idmva = new double[nev];
+      ph1r9    = new double[nev];
+      
+      ph2pt    = new double[nev];
+      ph2sceta = new double[nev];
+      ph2idmva = new double[nev];
+      ph2r9    = new double[nev];
+
+      cosDphi  = new double[nev];
+      sigMoM   = new double[nev];
+      sigMoM_wv= new double[nev];
+      pvtx     = new double[nev];
+
+
+
+      nev = tree->Draw("ph1.pt:ph1.sceta:ph1.idmva:bdt",cut,"goff");
+      tmp1   = tree->GetV1();
+      tmp2   = tree->GetV2();
+      tmp3   = tree->GetV3();
+      tmp4   = tree->GetV4();
+      for (int iev=0; iev<nev; ++iev) {
+	ph1pt[iev] = tmp1[iev];
+	ph1sceta[iev] = tmp2[iev];
+	ph1idmva[iev] = tmp3[iev];
+	bdt[iev]      = tmp4[iev];
+      }
+
+      nev = tree->Draw("ph2.pt:ph2.sceta:ph2.idmva",cut,"goff");
+      tmp1   = tree->GetV1();
+      tmp2   = tree->GetV2();
+      tmp3   = tree->GetV3();
+      for (int iev=0; iev<nev; ++iev) {
+	ph2pt[iev] = tmp1[iev];
+	ph2sceta[iev] = tmp2[iev];
+	ph2idmva[iev] = tmp3[iev];
+      }
+      
+      nev = tree->Draw("ph1.r9:ph2.r9:rho:nVtx",cut,"goff");
+      tmp1   = tree->GetV1();
+      tmp2   = tree->GetV2();
+      tmp3   = tree->GetV3();
+      tmp4   = tree->GetV3();
+      for (int iev=0; iev<nev; ++iev) {
+	ph1r9[iev] = tmp1[iev];
+	ph2r9[iev] = tmp2[iev];
+	rhos[iev]  = tmp3[iev];
+	nvtx[iev]  = tmp4[iev];
+      }
+
+      nev = tree->Draw("masserrsmeared/mass:masserrsmearedwrongvtx/mass:TMath::Cos(ph1.scphi-ph2.scphi):vtxprob",cut,"goff");
+      tmp1   = tree->GetV1();
+      tmp2   = tree->GetV2();
+      tmp3   = tree->GetV3();
+      tmp4   = tree->GetV4();
+      for (int iev=0; iev<nev; ++iev) {
+	ph1r9[iev] = tmp1[iev];
+
+	sigMoM   [iev]=tmp1[iev];
+	sigMoM_wv[iev]=tmp2[iev];
+	cosDphi  [iev]=tmp3[iev];
+	pvtx     [iev]=tmp4[iev];
+
+      }
+    } else {
+
+      vals  = tree->GetV1();
+      runs  = tree->GetV2();
+      lumis = tree->GetV3();
+      evts  = tree->GetV4();
+      
+    }
+
     for (int iev=0; iev<nev; ++iev) {
       vset->setVal(vals[iev]);
       
@@ -168,16 +288,42 @@ RooDataSet *makedset(TString name, TTree **trees, int numTrees, TCut cut, RooRea
 	}
       }
       
-      if (noskip)
+      if (noskip) {
 	dset->add(RooArgSet(*vset),tWeight);
+	
+	if( dumpEvents ) {
+
+	  int cicClass = 0;
+	  if( TMath::Abs(ph1sceta[iev]) > 1.5 || TMath::Abs(ph2sceta[iev]) > 1.5 ) cicClass+=2;
+	  if( ph1r9[iev] < 0.94 || ph2r9[iev] < 0.94 ) cicClass++;
+
+
+ 	  printf("type:0\trun:%d\tlumi:%d\tevent:%d\tnvtx:%d\trho:%.4e\tmgg:%.4e\tr9_1:%.4e\tsceta_1:%.4e\tidmva_1:%.4e\tptom_1:%.4e\tr9_2:%.4e\tsceta_2:%.4e\tidmva_2:%.4e\tptom_2:%.4e\tbdt:%.4e\tciccat:%d\tevcat:%d\tcosdphi:%.4e\tsigmom_rv:%.4e\tsigmom_wv:%.4e\tvtxprob:%.4e\n",
+ 		 (int) runs[iev], (int) lumis[iev],(unsigned int) evts[iev],
+		 (int) nvtx[iev], rhos[iev],vals[iev],		 
+ 		 ph1r9[iev],ph1sceta[iev],ph1idmva[iev],ph1pt[iev]/vals[iev],
+ 		 ph2r9[iev],ph2sceta[iev],ph2idmva[iev],ph2pt[iev]/vals[iev],
+ 		 bdt[iev],cicClass,catCounter,
+		 cosDphi  [iev],
+		 sigMoM   [iev],
+		 sigMoM_wv[iev],
+		 pvtx     [iev]
+		 );		 
+	  
+	  // 	  printf("type:0\trun:%d\tlumi:%d\tevent:%d\tmass:%.4e\tph1_pt:%.4e\t%s\n",
+	  // 		 (int) runs[iev], (int) lumis[iev],(int) evts[iev], vals[iev],
+// 		 ph1pt[iev],
+// 		 name.Data());		 
+	  
+	  
+	}
+      }
     }
   }
   
   return dset;
   
 }
-
-
 
 
 TTree *ApplyAsFriend(TTree *intree, TString tmvaweights, const std::vector<std::string> &vars, std::string targetname)
@@ -294,11 +440,11 @@ void createECALFilterMap(std::string fileName, std::map<int,std::map<int,std::ve
 
 #define DOBDT
 
-void fitbkgdataCard_HGG(bool dobands  = true, 
+void fitbkgdataCard_HGG(bool dobands  = false, 
 #ifdef DOBDT
 			TString configCard="templateHGG_8TeV_Moriond.config", 
 #else
-			TString configCard="templateHGG_8TeV_CiC_Moriond.config", 
+			TString configCard="templateHGG_8TeV_Moriond_CiC.config", 
 #endif
 			bool dosignal     = true, // plot the signal model (needs to be present)
 			double signalMass = 125.,
@@ -306,6 +452,7 @@ void fitbkgdataCard_HGG(bool dobands  = true,
 			bool blinded  = false,  // blind the data in the plots?
 			bool binned   = true,   // use binned data for all fits
 			bool plotDerivative = false,
+			bool dumpEventsOnly = false,
 			bool verbose  = false  ) {
   
   
@@ -408,9 +555,11 @@ void fitbkgdataCard_HGG(bool dobands  = true,
     } else {
       std::cout<<" [WARNING] Could not find file with signal workspace <"<<TString::Format("%s/model/ubsersignal.root", projectDir.Data())<<"."<<std::endl;
       std::cout<<"           Will not overlay signal model in plots. Work continues..."<<std::endl;
-      dosignal = false;      
+      dosignal = false; 
     }
-  } else {
+  }
+
+  if ( !dosignal ) {
     hmass = new RooRealVar("CMS_hgg_mass","m_{#gamma#gamma}",massmin,massmax,"GeV");
     hmass->setRange(massmin,massmax);
     hmass->setBins(4*(int)(massmax-massmin));
@@ -585,7 +734,11 @@ void fitbkgdataCard_HGG(bool dobands  = true,
 
     // check if we're in a sub-cat or the comb-cat
 
-    RooDataSet* data     = makedset(TString("data_")+catname, hdata, numFiles, masscut && it->second, hmass, sbweight, 1., &ecalLaserMap, skippedEvents.find(catname)->second);
+    
+    RooDataSet* data     = makedset(TString("data_")+catname, hdata, numFiles, masscut && it->second, hmass, sbweight, 1., catCounter, dumpEventsOnly, &ecalLaserMap, skippedEvents.find(catname)->second);
+    
+    if( dumpEventsOnly ) continue;
+
     RooDataSet* dataplot = (RooDataSet*) data->reduce( "CMS_hgg_mass < 110. || CMS_hgg_mass > 150." );
     
     // append the data to the combined data...
@@ -653,6 +806,8 @@ void fitbkgdataCard_HGG(bool dobands  = true,
     wOut->import(*data);
     wOut->import(*databinned);
   }
+
+  if (dumpEventsOnly) return;
 
   // check if we have a combined set (alwways true if more than 1 Cat)
   std::map<TString,TCut>::iterator it = anaCatMap.find("combcat");
