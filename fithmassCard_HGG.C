@@ -357,73 +357,6 @@ float ptweight(float genhpt) {
   return ptweights->GetBinContent(ptweights->FindFixBin(genhpt));
 }
 
-// float effweight( float sceta, float r9 ) {
-
-//   double scale = 1.;
-
-//   bool iseb   = TMath::Abs(sceta) < 1.5;
-//   bool isr9   = (r9 > 0.90);
-//   bool isr9_2 = (r9 > 0.94);
-
-
-//   if( false ) { // old pre-selection...
-  
-//     // electron veto scale-factros
-//     if      (  iseb &&  isr9_2 ) scale *= 0.998;
-//     else if (  iseb && !isr9_2 ) scale *= 0.984;
-//     else if ( !iseb &&  isr9_2 ) scale *= 0.992;
-//     else if ( !iseb && !isr9_2 ) scale *= 0.961;
-
-//     // pre-selection
-//     if      (  iseb &&  isr9 ) scale *=  1.003;
-//     else if (  iseb && !isr9 ) scale *=  0.996;
-//     else if ( !iseb &&  isr9 ) scale *=  0.997;
-//     else if ( !iseb && !isr9 ) scale *=  1.009;
-
-//     //BDT cut scale factors
-//     if      (  iseb &&  isr9_2 ) scale *= 1.0003;  
-//     else if (  iseb && !isr9_2 ) scale *= 1.0002; 
-//     else if ( !iseb &&  isr9_2 ) scale *= 0.9980; 
-//     else if ( !iseb && !isr9_2 ) scale *= 0.9999; 
-
-//     //   // electron veto scale-factros
-//     //   if      (  iseb &&  isr9_2 ) scale *= 0.998;
-//     //   else if (  iseb && !isr9_2 ) scale *= 0.984;
-//     //   else if ( !iseb &&  isr9_2 ) scale *= 0.992;
-//     //   else if ( !iseb && !isr9_2 ) scale *= 0.961;
-
-//     //   // pre-selection * BDT cut factors
-//     //   if      (  iseb &&  isr9 ) scale *= 0.998 * 1.0001;
-//     //   else if (  iseb && !isr9 ) scale *= 1.002 * 0.9995;
-//     //   else if ( !iseb &&  isr9 ) scale *= 1.008 * 0.9998;
-//     //   else if ( !iseb && !isr9 ) scale *= 0.996 * 0.9968;
-
-//   } else {
-  
-//     // electron veto scale-factros
-//     if      (  iseb &&  isr9_2 ) scale *= 0.998;
-//     else if (  iseb && !isr9_2 ) scale *= 0.984;
-//     else if ( !iseb &&  isr9_2 ) scale *= 0.992;
-//     else if ( !iseb && !isr9_2 ) scale *= 0.961;
-
-//     // pre-selection
-//     if      (  iseb &&  isr9 ) scale *=  1.000;
-//     else if (  iseb && !isr9 ) scale *=  0.984;
-//     else if ( !iseb &&  isr9 ) scale *=  1.003;
-//     else if ( !iseb && !isr9 ) scale *=  0.997;
-
-//     //BDT cut scale factors
-//     if      (  iseb &&  isr9_2 ) scale *= 1.0000;  
-//     else if (  iseb && !isr9_2 ) scale *= 0.9987; 
-//     else if ( !iseb &&  isr9_2 ) scale *= 1.0000; 
-//     else if ( !iseb && !isr9_2 ) scale *= 0.9978; 
-
-//   }
-
-//   return scale;
-
-// }
-
 // set to hold all the per-photon efficiency scale factors
 // only PHEFFSCALESET s that are turned ON will be considered
 // map holds the name of the set, than a pointer to another map, holding pairs of <etamin,etamax> and a vector with entries: #R9 boundaries, (R9boundaries), (scalefactors)
@@ -601,8 +534,6 @@ TTree *ApplyAsFriend(TTree *intree, TString tmvaweights, const std::vector<std::
       double _masserrsmeared         = 0.5*_mass*TMath::Sqrt( TMath::Power( _ph1_sigEoE_mod, 2) + TMath::Power( _ph2_sigEoE_mod, 2) );
       double _masserrsmearedwrongvtx = TMath::Sqrt(_masserrsmeared*_masserrsmeared + _deltamvtx*_deltamvtx);
       
-      //std::cout<<"   -> "<< _masserrsmeared/_mass<<"       "<<_masserrsmearedwrongvtx/_mass<<std::endl;
-      
       vals[0] = _masserrsmeared/_mass;
       vals[1] = _masserrsmearedwrongvtx/_mass;
     } 
@@ -701,16 +632,8 @@ RooDataSet *makedset(TString name, TTree *tree, TCut cut, RooRealVar *hmass, Roo
   RooDataSet *dset = new RooDataSet(name,"",RooArgSet(*hmass,*weight),weight->GetName());
   RooRealVar *vset = (RooRealVar*)dset->get()->find(hmass->GetName());
   
-//   std::cout<<" -----------------------------------------"<<std::endl;
-//   std::cout<<" Creating dataset with name = "<<name<<" :"<<std::endl;
-//   std::cout<<"   "<<cut<<std::endl;
-//   std::cout<<" -----------------------------------------"<<std::endl;
-
   tree->SetEstimate(tree->GetEntries());
   Int_t nev = tree->Draw("mass",cut,"goff");
-
-//   TString massrecomp = " TMath::Sqrt(ph1.e*ph2.e*(1-gencostheta)*2.) ";
-//   Int_t nev = tree->Draw(massrecomp.Data(),cut,"goff");
 
   double *vals = tree->GetV1();
   double *weights = tree->GetW();
@@ -834,22 +757,7 @@ void fithmassCard_HGG(bool fitonly        = false,
   
   procxseclist_names = &smlist;
   //procxseclist_names = &fflist;
-  
-  //   switch(model) {
-  //   case STANDARDMODEL:
-  //     procxseclist_names = &smlist;
-  //     break;
-  //   case STANDARDMODEL4:
-  //     procxseclist_names = &sm4list;
-  //     break;
-  //   case FERMIOPHOBIC:
-  //     procxseclist_names = &fflist;
-  //     break;
-  //   default:
-  //     std::cerr<<" Model "<<model<<" not implemented."<<std::endl;
-  //     return;
-  //   }
-  
+    
   //************************************************************************************
 
   // number of processes, Categories, Models and mass points
@@ -913,15 +821,6 @@ void fithmassCard_HGG(bool fitonly        = false,
 
 
   std::map<TString,TString> catToSmearMap;
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_mtag","cat4"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_etag","cat4"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_dijetloose","cat4"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_dijettight","cat4"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_mettag","cat4"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_bdt0","cat0"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_bdt1","cat1"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_bdt2","cat2"));
-//   catToSmearMap.insert(std::pair<TString,TString>("hgg_8TeV_hcp_bdt3","cat3"));
 
   bool status = readConfigCard(configCardName, 
 			       procMCfileMap,
@@ -1000,7 +899,8 @@ void fithmassCard_HGG(bool fitonly        = false,
   // set up the Vtx weights
 
   if ( vtxWeightFileName.CompareTo("") ) {
-    TFile* vtxWeightFile = TFile::Open("/home/fabstoec/cms/cmssw/029/CMSSW_5_3_2_patch4/src/UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/Macros/vertex_reweighing_mva_HCP2012_unblind.root");
+    //TFile* vtxWeightFile = TFile::Open("/home/fabstoec/cms/cmssw/029/CMSSW_5_3_2_patch4/src/UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/Macros/vertex_reweighing_mva_HCP2012_unblind.root");
+    TFile* vtxWeightFile = TFile::Open(vtxWeightFileName.Data());
     TString graphName_pass = "ratioVertex_cat0_pass";
     TString graphName_fail = "ratioVertex_cat0_fail";
     
@@ -1066,7 +966,8 @@ void fithmassCard_HGG(bool fitonly        = false,
 
   TFile* sigEoEscaleFile = NULL;
   if( correctSigEoEvar ) {
-    sigEoEscaleFile = TFile::Open("/home/fabstoec/cms/root/PhotonIDMVA_new/Moriond13_phSigEoE.root");
+    //sigEoEscaleFile = TFile::Open("/home/fabstoec/cms/root/PhotonIDMVA_new/Moriond13_phSigEoE.root");
+    sigEoEscaleFile = TFile::Open(sigeoeCorrFile.Data());
 
     scaleSigEoE_0_10  = (TGraph*) sigEoEscaleFile->Get( "sigeoescale_ABCD_0_10"  );
     scaleSigEoE_10_15 = (TGraph*) sigEoEscaleFile->Get( "sigeoescale_ABCD_10_15" );
@@ -1500,10 +1401,7 @@ void fithmassCard_HGG(bool fitonly        = false,
 	  return;
 	}
 
-
-        //TCut theWeight = "puweight(numPU)*bsweight(vtxZ,genHiggsZ)*trigeffscale()*effweight(ph1.sceta,ph1.r9)*effweight(ph2.sceta,ph2.r9)*vtxWeight(ptgg,vtxZ,genHiggsZ)";
         TCut theWeight = "puweight(numPU)*bsweight(vtxZ,genHiggsZ)*trigeffscale()*effweightCard(ph1.sceta,ph1.r9)*effweightCard(ph2.sceta,ph2.r9)*vtxWeight(ptgg,vtxZ,genHiggsZ)";
-        //TCut theWeight = "puweight(numPU)*trigeffscale()*effweight(ph1.sceta,ph1.r9)*effweight(ph2.sceta,ph2.r9)";
 	
  	TCut masscutModel   =  theBaseCut && TCut(TString::Format("mass > %f && mass < %f",massmin,massmax).Data());
  	TCut masscutReal    =  theBaseCut && TCut(TString::Format("mass > %f && mass < %f",massmin,massmax).Data());

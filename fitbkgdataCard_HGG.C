@@ -59,62 +59,6 @@ using namespace RooFit;
 
 #include "FstModels.h"     // some helpfer functions for different models (well... I cut away all but Bernstein, but can be brought back...)
 
-// RooDataSet *makedset(TString name, TTree *tree, TCut cut, RooRealVar *hmass, RooRealVar* sbweight = NULL, Double_t tWeight = 1.,
-// 		     std::map<int,std::map<int,std::vector<int>*>*>* eventMap = NULL,
-// 		     int* numSkipped = NULL) {
-  
-//   RooDataSet *dset = NULL;
-//   if( sbweight )
-//     dset = new RooDataSet(name,"",RooArgSet(*hmass,*sbweight),"sbweight");
-//   else
-//     dset = new RooDataSet(name,"",RooArgSet(*hmass));
-  
-//   RooRealVar *vset = (RooRealVar*)dset->get()->find(hmass->GetName());
-  
-
-//   std::cout<<"  ======================================= "<<std::endl;
-//   std::cout<<"  "<<cut<<std::endl;
-
-//   tree->SetEstimate(tree->GetEntries());
-
-//   Int_t nev = tree->Draw("mass:run:lumi:evt",cut,"goff");    
-//   std::cout<<"  Nev = "<<nev<<std::endl;
-
-//   double *vals  = tree->GetV1();
-//   double *runs  = tree->GetV2();
-//   double *lumis = tree->GetV3();
-//   double *evts  = tree->GetV4();
-//   //double *weights = tree->GetW();  // this is Data, has no weights.
-  
-//   for (int iev=0; iev<nev; ++iev) {
-//     vset->setVal(vals[iev]);
-
-//     bool noskip = true;  // if false, we skip event
-//     if ( eventMap ) {  // remove events in the map
-      
-//       noskip = ( eventMap->find( (int) runs[iev] ) == eventMap->end() || 
-// 		 eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) == eventMap->find( (int) runs[iev] ) ->second ->end() );
-//       if ( !noskip ){
-// 	noskip = true;
-// 	for(std::vector<int>::iterator it = eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->begin(); 
-// 	    it != eventMap->find( (int) runs[iev] ) -> second->find( (int) lumis[iev] ) -> second ->end(); ++it ){
-// 	  if (evts[iev] == (*it)) {
-// 	    noskip = false;
-// 	    if(numSkipped) (*numSkipped)++;
-// 	    std::cout<<" BAD ECAL Laser List: Skipping event "<<runs[iev]<<"  "<<lumis[iev]<<"  "<<evts[iev]<<std::endl;
-// 	    break;
-// 	  }
-// 	}
-//       }
-//     }
-      
-//     if (noskip)
-//       dset->add(RooArgSet(*vset),tWeight);
-//   }
-  
-//   return dset;
-  
-// }
 
 RooDataSet *makedset(TString name, TTree **trees, int numTrees, TCut cut, RooRealVar *hmass, RooRealVar* sbweight = NULL, Double_t tWeight = 1.,
 		     int catCounter = -1,
@@ -309,12 +253,6 @@ RooDataSet *makedset(TString name, TTree **trees, int numTrees, TCut cut, RooRea
 		 sigMoM_wv[iev],
 		 pvtx     [iev]
 		 );		 
-	  
-	  // 	  printf("type:0\trun:%d\tlumi:%d\tevent:%d\tmass:%.4e\tph1_pt:%.4e\t%s\n",
-	  // 		 (int) runs[iev], (int) lumis[iev],(int) evts[iev], vals[iev],
-// 		 ph1pt[iev],
-// 		 name.Data());		 
-	  
 	  
 	}
       }
@@ -564,12 +502,14 @@ void fitbkgdataCard_HGG(bool dobands  = false,
     hmass->setRange(massmin,massmax);
     hmass->setBins(4*(int)(massmax-massmin));
   }
-  
+
+
   std::cout<<" Checking for directory: "<<TString::Format("%s/databkg/",projectDir.Data())<<" ... "<<std::endl;
-  
+  if( gSystem->mkdir(TString::Format("%s",projectDir.Data())) == 0 )
+    std::cerr<<" WARNING: Could not find directory to "<<TString::Format("%s",projectDir.Data()).Data()<<". Creating it."<<std::endl;
   if( gSystem->mkdir(TString::Format("%s/databkg/",projectDir.Data())) == 0 )
-    std::cerr<<" WARNING: Could not find directory to "<<TString::Format("%s/databkg/",projectDir.Data()).Data()<<". Creating it."<<std::endl;
-  
+      std::cerr<<" WARNING: Could not find directory to "<<TString::Format("%s/databkg/",projectDir.Data()).Data()<<". Creating it."<<std::endl;    
+
   hmass->setRange("fitrange",massmin,massmax);
 
   RooRealVar *sbweight = new RooRealVar("sbweight","",0.);
@@ -599,25 +539,6 @@ void fitbkgdataCard_HGG(bool dobands  = false,
     }
   }
 
-
-//   TFile *datafile = new TFile(datafilename.Data(),"READ");
-//   if ( !datafile ) {
-//     std::cerr<<" ERROR: Could not open datafile with name > "<<datafilename.Data()<<" <."<<std::endl;
-//     return;
-//   }
-
-//   TDirectory *datadir = (TDirectory*) datafile->FindObjectAny(modname);
-//   if ( !datadir ) {
-//     std::cerr<<" ERROR: Could not find directory > "<<modname.Data()<<" < in datafile with name > "<<datafilename.Data()<<" <."<<std::endl;
-//     return;
-//   }
-
-//   TTree *hdata = (TTree*)datadir->Get(treename.Data());  
-//   if ( !hdata ) {
-//     std::cerr<<" ERROR: Could not find Tree > "<<treename.Data()<<" < in directory > "<<modname.Data()<<" in datafile with name > "<<datafilename.Data()<<" <."<<std::endl;
-//     return;
-//   }
-  
   // open the MVA files, if requested
   TFile* tmvaOutput = NULL;
   TString weights   = "";
@@ -791,7 +712,6 @@ void fitbkgdataCard_HGG(bool dobands  = false,
     pdfShape_vec.push_back(bkgshape);
     pdf_vec     .push_back(bkgpdf);
     data_vec    .push_back(data);      
-    //data_vecplot.push_back( data->reduce( TString::Format("CMS_hzg_mass_%s < 120. || CMS_hzg_mass_%s > 140.", (doElectrons ? "ee" : "mm"), (doElectrons ? "ee" : "mm")).Data() ) );
     data_vecplot.push_back( data->reduce( "CMS_hgg_mass < 110. || CMS_hgg_mass > 150." ) );
 
     // store the index for alter reference
@@ -814,7 +734,6 @@ void fitbkgdataCard_HGG(bool dobands  = false,
   if (it != anaCatMap.end()) {
     
     catCounter++;
-    std::cout<<" *********** SHOULD NEVER BE HERE ************* "<<std::endl;
     TString catname = it->first;
     RooDataSet* data = datacombcat;   // we're looking at the last cat (by construction the combination)
     RooDataSet* dataplot = datacombcatplot ;
@@ -859,7 +778,7 @@ void fitbkgdataCard_HGG(bool dobands  = false,
   wOut->import(datacomb);  
   wOut->import(*datacomb_binned);  
   wOut->import(fullbkgpdf);
-  //wOut->import(*fullbkgfitres);
+  wOut->import(*fullbkgfitres);
 
   if( verbose ) wOut->Print();
 
@@ -1130,12 +1049,8 @@ void fitbkgdataCard_HGG(bool dobands  = false,
     // -------------------------------------------------------    
     // save canvas in different formats
     canbkg[catIdx]->SaveAs( TString::Format("%s/databkg/databkg%s.pdf",projectDir.Data(),catname.Data()) );
-//     canbkg[catIdx]->SaveAs(TString("databkg") + catname + TString(".eps"));
-//     canbkg[catIdx]->SaveAs(TString("databkg") + catname + TString(".gif"));
-//     canbkg[catIdx]->SaveAs(TString("databkg") + catname + TString(".root"));              
     
     if (plotDerivative) {
-
 
       derlat [catIdx] = new TLatex(0.1,0.95,TString::Format("#scale[0.7]{#splitline{CMS preliminary}{#sqrt{s} = %.1f TeV L = %.2f fb^{-1}}}",theCMenergy,totallumi));
       derlat [catIdx]->SetNDC();
@@ -1172,12 +1087,10 @@ void fitbkgdataCard_HGG(bool dobands  = false,
       firstDer->GetXaxis()->SetTitle("m_{#gamma#gamma} [GeV]");
       firstDer->GetYaxis()->SetTitle("d^{2}N/dm_{#gamma#gamma}^{2} [1/GeV^{2}]");
 
-      //derlat [catIdx]->Draw();
       topText->Draw();
       topText2->Draw();
       derlat2[catIdx]->Draw();
       
-      //canbkg_der[catIdx]->SaveAs(TString("databkg_der_") + catname + TString(".pdf"));
       canbkg_der[catIdx]->SaveAs(TString::Format("%s/databkg/databkg_der_%s.pdf",projectDir.Data(),catname.Data()));
 
       secondDer = new TGraph();
@@ -1208,7 +1121,6 @@ void fitbkgdataCard_HGG(bool dobands  = false,
       topText2->Draw();
       derlat2[catIdx]->Draw();
 
-      //canbkg_der2[catIdx]->SaveAs(TString("databkg_der2_") + catname + TString(".pdf"));
       canbkg_der2[catIdx]->SaveAs(TString::Format("%s/databkg/databkg_der2_%s.pdf",projectDir.Data(),catname.Data()));
 
     }
@@ -1279,7 +1191,6 @@ bool readFromConfigCard( TString fileName,
     char smearcat[1000];
     int catIdx = -1;
     char catName[400];
-    char theCat[400];
     float lumi    = -1.;
     float massval = -1.;
     float smear   = -1.;
@@ -1318,7 +1229,7 @@ bool readFromConfigCard( TString fileName,
       std::string catLine = totLine.substr(startCat+1, endCat-startCat-1);
       
       // erase starting empties...
-      int fPos = catLine.find_first_not_of(" ");
+      size_t fPos = catLine.find_first_not_of(" ");
       catLine.erase(0,fPos);
       
       // test string for all 
@@ -1374,7 +1285,7 @@ bool readFromConfigCard( TString fileName,
       std::string catLine = totLine.substr(startCat+1, endCat-startCat-1);
       
       // erase starting empties...
-      int fPos = catLine.find_first_not_of(" ");
+      size_t fPos = catLine.find_first_not_of(" ");
       catLine.erase(0,fPos);
       
       // test string for all 
@@ -1411,16 +1322,15 @@ bool readFromConfigCard( TString fileName,
 
       // additional setup
       int theProc = -1;
-      char name[30];
+      char nameTwo[30];
       
-      char onoff[3];
       char MCfileName[200];
       
       
-      if ( sscanf(line,"PROC %d %s %s file:%s",&theProc, name, onoff, MCfileName) ) {
+      if ( sscanf(line,"PROC %d %s %s file:%s",&theProc, nameTwo, onoff, MCfileName) ) {
 	//# ------------------------------------------------------------------------------------------------------------------------------------------------
 	//PROC    0	ggh	OFF			file:/scratch/fabstoec/cms/hist/hgg-7TeV-janReReco/merged/hgg-7TeV-janReReco_f11--h%dgg-gf-v14b-pu_noskim.root
-	procNameList.push_back( TString(name) );
+	procNameList.push_back( TString(nameTwo) );
       }
     }
   }

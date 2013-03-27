@@ -1,4 +1,4 @@
-// $Id: runHgg2012HCP.C,v 1.1 2012/10/08 17:41:20 mingyang Exp $
+// $Id: runHgg2012HCP.C,v 1.2 2012/10/24 14:47:27 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -65,9 +65,9 @@ void runHgg2012HCP(const char *fileset    = "0000",
     //return;
   } 
   
-  TString jsonFile = TString("/home/mingyang/cms/json/") + TString(json);
-  //TString jsonFile = TString("/home/mingyang/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) );
+  TString jsonFile = TString("/home/fabstoec/cms/json/") + TString(json);
+  //TString jsonFile = TString("/home/fabstoec/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0) );
   
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -104,11 +104,11 @@ void runHgg2012HCP(const char *fileset    = "0000",
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/mingyang/cms/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/fabstoec/cms/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/fabstoec/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/mingyang/cms/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/fabstoec/cms/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
@@ -251,12 +251,12 @@ void runHgg2012HCP(const char *fileset    = "0000",
   eleIdMod -> SetEtaMax(2.5);
   eleIdMod -> SetApplyEcalFiducial(true);
   eleIdMod -> SetIDType("Hgg_LeptonTag_2012IdHCP");  
-  eleIdMod -> SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
-  eleIdMod -> SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
-  eleIdMod -> SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
-  eleIdMod -> SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
-  eleIdMod -> SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
-  eleIdMod -> SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml")))); 
+  eleIdMod -> SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat1.weights.xml"))));
+  eleIdMod -> SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat2.weights.xml"))));  
+  eleIdMod -> SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat3.weights.xml"))));  
+  eleIdMod -> SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat4.weights.xml")))); 
+  eleIdMod -> SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat5.weights.xml")))); 
+  eleIdMod -> SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat6.weights.xml")))); 
   eleIdMod -> SetWhichVertex(-1);
   eleIdMod -> SetD0Cut(0.02);
   eleIdMod -> SetDZCut(0.2); //h  
@@ -341,8 +341,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  //photcic->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
-  photcic->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcic->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photcic->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photcic->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcic->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcic->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -389,8 +389,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  //photcicnoeleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
-  photcicnoeleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcicnoeleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photcicnoeleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -438,8 +438,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  //photpresel->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
-  photpresel->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpresel->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photpresel->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photpresel->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpresel->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpresel->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -483,8 +483,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  //photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
-  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photpreselinverteleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -593,6 +593,15 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreepresel->SetApplyPFMetCorr(kTRUE);
    phottreepresel->SetBeamspotWidth(5.0);
    
+  phottreepresel -> SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat1.weights.xml"))));
+  phottreepresel -> SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat2.weights.xml"))));  
+  phottreepresel -> SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat3.weights.xml"))));  
+  phottreepresel -> SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat4.weights.xml")))); 
+  phottreepresel -> SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat5.weights.xml")))); 
+  phottreepresel -> SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/Electrons_BDTG_NonTrigV0_Cat6.weights.xml")))); 
+
+
+
    PhotonTreeWriter *phottreepreselinverteleveto = new PhotonTreeWriter("PhotonTreeWriterPreselInvertEleVeto");
    phottreepreselinverteleveto->SetPhotonsFromBranch(kFALSE);
    phottreepreselinverteleveto->SetInputPhotonsName(photpreselinverteleveto->GetOutputName());
@@ -704,17 +713,20 @@ void runHgg2012HCP(const char *fileset    = "0000",
   SepPUMod         ->Add(eleIdMod);
   eleIdMod         ->Add(muonIdMod);
    
-  muonIdMod          ->Add(photcic);
-  muonIdMod          ->Add(photcicnoeleveto);  
-  muonIdMod          ->Add(photpresel);  
-  muonIdMod          ->Add(photpreselinverteleveto);  
-  muonIdMod          ->Add(photpreselnosmear);  
+//   muonIdMod          ->Add(photcic);
+//   muonIdMod          ->Add(photcicnoeleveto);  
+//   muonIdMod          ->Add(photpreselinverteleveto);  
+//   muonIdMod          ->Add(photpreselnosmear);  
 
-  photcic         ->Add(phottreecic);
-  photcicnoeleveto       ->Add(phottreecicnoeleveto);
+  muonIdMod          ->Add(photpresel);  
+
+
+//   photcic         ->Add(phottreecic);
+//   photcicnoeleveto       ->Add(phottreecicnoeleveto);
+//   photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
+//   photpreselnosmear    ->Add(phottreepreselnosmear);
+
   photpresel    ->Add(phottreepresel);
-  photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
-  photpreselnosmear    ->Add(phottreepreselnosmear);
 
 
   //jetCorr          ->Add(photidpresel);
@@ -751,13 +763,42 @@ void runHgg2012HCP(const char *fileset    = "0000",
   Dataset *d = NULL;
   TString bookstr = book;
   //if (TString(dataset).Contains("s11-h")) bookstr.ReplaceAll("local","t2mit");
-  if (TString(skim).CompareTo("noskim") == 0)
-    d = c->FindDataset(bookstr,dataset,fileset);
-  else 
-    d = c->FindDataset(bookstr,skimdataset.Data(),fileset);
-  ana->AddDataset(d);
-  //ana->AddFile("/scratch/mingyang/root/DA2D6D6F-BB95-E111-9564-001A92971B7E.root");
 
+//   if (TString(skim).CompareTo("noskim") == 0)
+//     d = c->FindDataset(bookstr,dataset,fileset);
+//   else 
+//     d = c->FindDataset(bookstr,skimdataset.Data(),fileset);
+//   ana->AddDataset(d);
+
+  std::vector<TString> synchFile;
+
+//   synchFile.push_back("26650E45-A902-E211-9523-001D09F29146.root");
+//   synchFile.push_back("FC4B4004-6502-E211-B532-BCAEC518FF8A.root");
+//   synchFile.push_back("063C9BE3-8F02-E211-9503-001D09F2424A.root");
+//   synchFile.push_back("10946F3E-4F02-E211-ACA8-5404A63886BB.root");
+//   synchFile.push_back("70EAB2D6-8F02-E211-AD24-001D09F29146.root");
+//   synchFile.push_back("50F136D5-8F02-E211-A7E1-001D09F25109.root");
+//   synchFile.push_back("ACF83417-6502-E211-8A06-002481E0D90C.root");
+//   synchFile.push_back("50F136D5-8F02-E211-A7E1-001D09F25109.root");
+//   synchFile.push_back("84D8683B-3702-E211-ACC8-BCAEC53296F3.root");
+//   synchFile.push_back("64CF7800-6802-E211-AE29-003048D374CA.root");
+//   synchFile.push_back("044DE8D2-8F02-E211-BEF1-00215AEDFD98.root");
+//   synchFile.push_back("6A50C106-6002-E211-A8FD-003048F118E0.root");
+//   synchFile.push_back("80DCA06C-5002-E211-B0FD-5404A6388692.root");
+//   synchFile.push_back("1600BC48-4F02-E211-B8FA-BCAEC518FF6B.root");
+//   synchFile.push_back("36E6F661-9002-E211-8ED4-001D09F253D4.root");
+
+  synchFile.push_back("28B1B2DB-AAF5-E111-8D01-E0CB4E4408E3.root");
+  synchFile.push_back("1EA891A9-77F8-E111-BD59-003048D2BB90.root");
+  synchFile.push_back("38E9A015-F1F8-E111-9654-001D09F28D4A.root");
+  synchFile.push_back("DC46A78E-60E0-E111-B65D-001D09F25479.root");
+  synchFile.push_back("B490A799-45DD-E111-A676-001D09F2AD4D.root");
+  synchFile.push_back("2E00B5D2-C9DD-E111-81B5-0025901D6268.root");
+
+  for( unsigned int iF = 0 ; iF<synchFile.size(); ++iF) {
+    ana->AddFile("root://xrootd.cmsaf.mit.edu//store/user/paus/filefi/029/r12c-dph-pr-v2/"+synchFile[iF]);   ///scratch/fabstoec/root/DA2D6D6F-BB95-E111-9564-001A92971B7E.root");
+    //ana->AddFile("root://xrootd.cmsaf.mit.edu//store/user/paus/filefi/029/r12b-dph-j13-v1/"+synchFile[iF]);   ///scratch/fabstoec/root/DA2D6D6F-BB95-E111-9564-001A92971B7E.root");
+  }
   //------------------------------------------------------------------------------------------------
   // organize output
   //------------------------------------------------------------------------------------------------
@@ -787,3 +828,4 @@ void runHgg2012HCP(const char *fileset    = "0000",
 
   return;
 }
+
