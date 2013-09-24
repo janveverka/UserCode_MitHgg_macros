@@ -89,9 +89,9 @@ max_num_len = int(math.floor(math.log10(len(all_variables)))) + 1
 
 #_______________________________________________________________________________
 def main():
-    print_all_variables()
-    print ''
     print_example_line()
+    print ''
+    print_all_variables()
 ## End of main()
 
 
@@ -123,8 +123,8 @@ def print_all_variables():
 #_______________________________________________________________________________
 def print_variable_list(variables):
     for var in variables:
-        index = all_variables.index(var)
-        print '%*d   %s' % (max_num_len, index, var)
+        var_num = all_variables.index(var) + 1
+        print '%*d   %s' % (max_num_len, var_num, var)
 ## End of print_variable_list()
 
 
