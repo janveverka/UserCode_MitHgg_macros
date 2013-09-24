@@ -37,6 +37,7 @@ per_photon_variables = '''
     HoE
     hcalIso03
     trkIso03
+    pfChargedIsoGood02
     pfChargedIsoGood03
     pfChargedIsoBad03
     pfPhotonIso03
@@ -130,7 +131,6 @@ def print_variable_list(variables):
 
 #_______________________________________________________________________________
 def print_example_line():
-    print 'Example Line:'
     print '\t'.join([var + ': -999' for var in all_variables])
 ## End of print_example_line()
 
