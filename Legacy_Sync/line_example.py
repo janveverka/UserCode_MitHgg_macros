@@ -27,7 +27,6 @@ per_diphoton_variables = '''
     p2Conv
     nConv
     cosDPhi
-    rho
     '''.split()
 
 ## Will be prepended with pho{1,2}_ for the leading and subleading photon.
