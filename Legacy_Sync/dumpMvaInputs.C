@@ -59,7 +59,18 @@
 
 #include "TRandom3.h"
 
-void dumpMvaInputs(bool debug = true, TString fileName = "/home/mingyang/cms/hist/hgg-2013Final8TeV/merged/hgg-2013Final8TeV_s12-h120gg-vh-v7n_noskim.root") {
+
+// Declaration of functions.
+//_____________________________________________________________________________
+void dumpMvaInputs(bool debug = true,
+                   TString fileName =
+                      "/home/mingyang/cms/hist/hgg-2013Final8TeV/merged/"
+                      "hgg-2013Final8TeV_s12-h120gg-vh-v7n_noskim.root");
+template <class T>
+void dumpVar(const char *name, T value, bool appendTab=true);
+
+//_____________________________________________________________________________
+void dumpMvaInputs(bool debug, TString fileName) {
  
   TFile* file = TFile::Open(fileName.Data());
 
@@ -258,7 +269,7 @@ void dumpMvaInputs(bool debug = true, TString fileName = "/home/mingyang/cms/his
   float convVtxZ1, convVtxRes1, convVtxChi1;
   float convVtxZ2, convVtxRes2, convVtxChi2;
 
-  int convVtxIdx1, convVtxIdx2;
+  int convVtxIdx1, convVtxIdx2, vtxNconv;
 
   theTree->SetBranchAddress("vtxConv1Z",&convVtxZ1);
   theTree->SetBranchAddress("vtxConv1DZ",&convVtxRes1);
@@ -269,6 +280,8 @@ void dumpMvaInputs(bool debug = true, TString fileName = "/home/mingyang/cms/his
   theTree->SetBranchAddress("vtxConv2DZ",&convVtxRes2);
   theTree->SetBranchAddress("vtxConv2Prob",&convVtxChi2);
   theTree->SetBranchAddress("vtxConvIdx2",&convVtxIdx2);
+
+  theTree->SetBranchAddress("vtxNconv",&vtxNconv);
 
   float vtxz1, vtxz2, vtxz3;
   theTree->SetBranchAddress("vtxMva1Z",&vtxz1);
@@ -312,175 +325,128 @@ void dumpMvaInputs(bool debug = true, TString fileName = "/home/mingyang/cms/his
 
   TRandom3 rng(0);
 
-  int evCounter=0;
-  
-  for(int i=0; i<theTree->GetEntries(); ++i) {
+  int eventCounter=0;
+
+  // Loop over the entries.
+  for (int i=0; i < theTree->GetEntries(); ++i) {
    
+    if (eventCounter > 9 && debug ) break;
+    
     theTree->GetEntry(i);
-    
-    if( mass > 100 && mass < 180  && ph1pt > mass/3. && ph2pt > 100./4) {
-      
-      if(evCounter > 9 && debug ) break;
 
-      vbfTag = 0;
-      
-      if (jet1pt > 30.0 &&
-          jet2pt > 30.0 &&
-          abs(jet1eta - jet2eta) > 3. &&
-          dijetmass > 500.0 &&
-          zeppenfeld < 2.5 &&
-          abs(dphidijetgg) > 2.6 &&
-          ph1pt > (60.0 * mass / 120.0) &&
-          ph2pt > 25.) {
-        vbfTag = 2;
-      } else if (jet1pt > 30.0 &&
-                 jet2pt > 20.0 &&
-                 abs(jet1eta - jet2eta) > 3. &&
-                 dijetmass > 250.0 &&
-                 zeppenfeld < 2.5 &&
-                 abs(dphidijetgg) > 2.6 &&
-                 !(jet2pt > 30.0 && dijetmass > 500.0) &&
-                 ph1pt > (60.0 * mass / 120.0) &&
-                 ph2pt > 25.) {
-        vbfTag = 1;
-      }
+    bool passPreselection = (mass < 100 &&
+                             mass < 180 &&
+                             ph1pt > mass/3. &&
+                             ph2pt > 100./4);
 
-      // test for evt Cat
-      /*int evCat = -1;
-      if ( leptonTag > 1.5 && leptonTag < 2.5 && ph2pt > mass/4) evCat = 6;
-      else if ( leptonTag > 0.5 && leptonTag < 1.5 && ph2pt > mass/4) evCat = 7;
-      else if ( vbfTag > 0.5 && vbfTag < 1.5) evCat = 5;
-      else if ( vbfTag > 1.5 ) evCat = 4;
-      else if ( TMath::Abs(ph1sceta) < 1.4442 && TMath::Abs(ph2sceta) < 1.4442 && corrpfmet > 70. && ph1pt/mass > 45./120. &&
-		TMath::ACos(TMath::Cos(phigg-corrpfmetphi)) > 2.1 && 
-		( jetleadNoIDpt < 50. || 
-		  TMath::Sqrt( TMath::Power(ph1sceta-jetleadNoIDeta,2)+TMath::Power(TMath::ACos(TMath::Cos(ph1scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::Sqrt( TMath::Power((ph2sceta-jetleadNoIDeta),2)+TMath::Power(TMath::ACos(TMath::Cos(ph2scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::ACos(TMath::Cos(TMath::Abs(jetleadNoIDphi-corrpfmetphi))) < 2.7 ) && ph2pt > mass/4) evCat = 8;
-      else if ( TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5 && ph1r9 > 0.94 && ph2r9 > 0.94 && ph2pt > mass/4) evCat = 0;
-      else if ( TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5 && !(ph1r9 > 0.94 && ph2r9 > 0.94) && ph2pt > mass/4) evCat = 1;
-      else if ( !(TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5) && ph1r9 > 0.94 && ph2r9 > 0.94 && ph2pt > mass/4) evCat = 2;
-      else if ( !(TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5) && !(ph1r9 > 0.94 && ph2r9 > 0.94) && ph2pt > mass/4) evCat = 3;*/
+    if (passPreselection == false) continue;
 
-      int evCat = -1;
-      if ( leptonTag > 1.5 && leptonTag < 2.5 && ph2pt > 100./4 && ph1pt/mass > 45./120.) evCat = 6;
-      else if ( leptonTag > 0.5 && leptonTag < 1.5 && ph2pt > 100./4  && ph1pt/mass > 45./120.) evCat = 7;
-      else if ( vbfTag > 0.5 && vbfTag < 1.5) evCat = 5;
-      else if ( vbfTag > 1.5 ) evCat = 4;
-      else if ( TMath::Abs(ph1sceta) < 1.4442 && TMath::Abs(ph2sceta) < 1.4442 && corrpfmet > 70. && ph1pt/mass > 45./120. &&
-		TMath::ACos(TMath::Cos(phigg-corrpfmetphi)) > 2.1 && 
-		( jetleadNoIDpt < 50. || 
-		  TMath::Sqrt( TMath::Power(ph1sceta-jetleadNoIDeta,2)+TMath::Power(TMath::ACos(TMath::Cos(ph1scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::Sqrt( TMath::Power((ph2sceta-jetleadNoIDeta),2)+TMath::Power(TMath::ACos(TMath::Cos(ph2scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::ACos(TMath::Cos(TMath::Abs(jetleadNoIDphi-corrpfmetphi))) < 2.7 ) && ph2pt > 100./4) evCat = 8;
-      else if ( TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5 && ph1r9 > 0.94 && ph2r9 > 0.94 && ph2pt > mass/4) evCat = 0;
-      else if ( TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5 && !(ph1r9 > 0.94 && ph2r9 > 0.94) && ph2pt > mass/4) evCat = 1;
-      else if ( !(TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5) && ph1r9 > 0.94 && ph2r9 > 0.94 && ph2pt > mass/4) evCat = 2;
-      else if ( !(TMath::Abs(ph1sceta) < 1.5 &&  TMath::Abs(ph2sceta) < 1.5) && !(ph1r9 > 0.94 && ph2r9 > 0.94) && ph2pt > mass/4) evCat = 3;
-      
-      evCounter++;
+    eventCounter++;
 
-      if(evCat != -1){
-      //if(true){
+    // Event Variables
+    dumpVar("run"                    , run                    ); //  1
+    dumpVar("lumi"                   , lumi                   ); //  2
+    dumpVar("event"                  , evt                    ); //  3
+    dumpVar("rho"                    , rho                    ); //  4
 
-      printf("type:0\trun:%d\tlumi:%d\tevent:%d\trho:%.4e\tr9_1:%.4e\tsceta_1:%.4e\thoe_1:%.4e\tsigieie_1:%.4e\tecaliso_1:%.4e\thcaliso_1:%.4e\ttrckiso_1:%.4e\tchpfis2_1:%.4e\tchpfis3_1:%.4e\tr9_2:%.4e\tsceta_2:%.4e\thoe_2:%.4e\tsigieie_2:%.4e\tecaliso_2:%.4e\thcaliso_2:%.4e\ttrckiso_2:%.4e\tchpfis2_2:%.4e\tchpfiso3_2:%.4e\t",	     
-	     run,lumi,evt,rho,
-	     ph1r9,ph1sceta,hovere_1,sieie_1,
-	     ecalisodr03_1-0.012*ph1pt,
-	     hcalisodr03_1-0.005*ph1pt,
-	     trkisohollowdr03_1-0.002*ph1pt,
-	     idmva_ChargedIso_0p2_presel_1,idmva_ChargedIso_presel_1,
-	     ph2r9,ph2sceta,hovere_2,sieie_2,
-	     ecalisodr03_2-0.012*ph2pt,
-	     hcalisodr03_2-0.005*ph2pt,
-	     trkisohollowdr03_2-0.002*ph2pt,
-	     idmva_ChargedIso_0p2_presel_2,idmva_ChargedIso_presel_2);
+    // Leading Photon Variables
+    dumpVar("pho1_ind"               , -999                   ); //  5
+    dumpVar("pho1_scInd"             , -999                   ); //  6
+    dumpVar("pho1_pt"                , ph1pt                  ); //  7
+    dumpVar("pho1_eta"               , teta1                  ); //  8
+    dumpVar("pho1_phi"               , phi1                   ); //  9
+    dumpVar("pho1_e"                 , ph1e                   ); // 10
+    dumpVar("pho1_eErr"              , ph1eerr                ); // 11
+//     dumpVar("pho1_isConv"            , pho1_isConv            ); // 12
+//     dumpVar("pho1_HoE"               , pho1_HoE               ); // 13
+//     dumpVar("pho1_hcalIso03"         , pho1_hcalIso03         ); // 14
+//     dumpVar("pho1_trkIso03"          , pho1_trkIso03          ); // 15
+//     dumpVar("pho1_pfChargedIsoGood02", pho1_pfChargedIsoGood02); // 16
+//     dumpVar("pho1_pfChargedIsoGood03", pho1_pfChargedIsoGood03); // 17
+//     dumpVar("pho1_pfChargedIsoBad03" , pho1_pfChargedIsoBad03 ); // 18
+//     dumpVar("pho1_pfPhotonIso03"     , pho1_pfPhotonIso03     ); // 19
+//     dumpVar("pho1_pfNeutralIso03"    , pho1_pfNeutralIso03    ); // 20
+//     dumpVar("pho1_sieie"             , pho1_sieie             ); // 21
+//     dumpVar("pho1_sieip"             , pho1_sieip             ); // 22
+//     dumpVar("pho1_etaWidth"          , pho1_etaWidth          ); // 23
+//     dumpVar("pho1_phiWidth"          , pho1_phiWidth          ); // 24
+//     dumpVar("pho1_r9"                , pho1_r9                ); // 25
+//     dumpVar("pho1_lambdaRatio"       , pho1_lambdaRatio       ); // 26
+//     dumpVar("pho1_s4Ratio"           , pho1_s4Ratio           ); // 27
+//     dumpVar("pho1_scEta"             , pho1_scEta             ); // 28
+//     dumpVar("pho1_ESEffSigmaRR"      , pho1_ESEffSigmaRR      ); // 29
+//     dumpVar("pho1_ptOverM"           , pho1_ptOverM           ); // 30
+// 
+//     // Trailing Photon Variables
+//     dumpVar("pho2_ind"               , pho2_ind               ); // 31
+//     dumpVar("pho2_scInd"             , pho2_scInd             ); // 32
+//     dumpVar("pho2_pt"                , pho2_pt                ); // 33
+//     dumpVar("pho2_eta"               , pho2_eta               ); // 34
+//     dumpVar("pho2_phi"               , pho2_phi               ); // 35
+//     dumpVar("pho2_e"                 , pho2_e                 ); // 36
+//     dumpVar("pho2_eErr"              , pho2_eErr              ); // 37
+//     dumpVar("pho2_isConv"            , pho2_isConv            ); // 38
+//     dumpVar("pho2_HoE"               , pho2_HoE               ); // 39
+//     dumpVar("pho2_hcalIso03"         , pho2_hcalIso03         ); // 40
+//     dumpVar("pho2_trkIso03"          , pho2_trkIso03          ); // 41
+//     dumpVar("pho2_pfChargedIsoGood02", pho2_pfChargedIsoGood02); // 42
+//     dumpVar("pho2_pfChargedIsoGood03", pho2_pfChargedIsoGood03); // 43
+//     dumpVar("pho2_pfChargedIsoBad03" , pho2_pfChargedIsoBad03 ); // 44
+//     dumpVar("pho2_pfPhotonIso03"     , pho2_pfPhotonIso03     ); // 45
+//     dumpVar("pho2_pfNeutralIso03"    , pho2_pfNeutralIso03    ); // 46
+//     dumpVar("pho2_sieie"             , pho2_sieie             ); // 47
+//     dumpVar("pho2_sieip"             , pho2_sieip             ); // 48
+//     dumpVar("pho2_etaWidth"          , pho2_etaWidth          ); // 49
+//     dumpVar("pho2_phiWidth"          , pho2_phiWidth          ); // 50
+//     dumpVar("pho2_r9"                , pho2_r9                ); // 51
+//     dumpVar("pho2_lambdaRatio"       , pho2_lambdaRatio       ); // 52
+//     dumpVar("pho2_s4Ratio"           , pho2_s4Ratio           ); // 53
+//     dumpVar("pho2_scEta"             , pho2_scEta             ); // 54
+//     dumpVar("pho2_ESEffSigmaRR"      , pho2_ESEffSigmaRR      ); // 55
+//     dumpVar("pho2_ptOverM"           , pho2_ptOverM           ); // 56
 
-      float bsw=4.8;
+    // Diphoton Variables
+    dumpVar("mass"                   , mass                   ); // 57
+    dumpVar("rVtxSigmaMoM"           , masserr_ns             ); // 58
+    dumpVar("wVtxSigmaMoM"           , masserrwvtx_ns         ); // 59
+    dumpVar("vtxIndex"               , vertexId1              ); // 60
+    dumpVar("vtxProb"                , vtxprob                ); // 61
+    dumpVar("ptBal"                  , ptbal                  ); // 62
+    dumpVar("ptAsym"                 , ptasym                 ); // 63
+    dumpVar("logSPt2"                , TMath::Log(sumpt2)     ); // 64
+    dumpVar("p2Conv"                 , p2conv                 ); // 65
+    dumpVar("nConv"                  , vtxNconv               ); // 66
+    dumpVar("cosDPhi"                , TMath::Cos(phi1-phi2)  ); // 67
 
-      printf("ptH:%.4e\tphoid_1:%.4e\tphoid_2:%.4e\tphoeta_1:%.4e\tphoeta_2:%.4e\tsigmrv:%.4e\tbsw:%.4e\tsigmwv:%.4e\tpt_1/m:%.4e\tpt_2/m:%.4e\tvtxprob:%.4e\tcosdphi:%.4e\tmgg:%.4e\te_1:%.4e\te_2:%.4e\teerr_1:%.4e\teerr_2:%.4e\teerrsmeared_1:%.4e\teerrsmeared_2:%.4e\tvbfevt:%d\tmuontag:%d\telectrontag:%d\tmettag:%d\tevcat:%d\t",
-	     ptgg,
-	     idmva_1, idmva_2,
-	     teta1,teta2,
-	     masserr,bsw,masserrwvtx,
-	     ph1pt/mass, ph2pt/mass,
-	     vtxprob,TMath::Cos(phi1-phi2),
-	     mass,
-	     ph1e, ph2e,
-	     ph1eerr,ph2eerr,
-	     ph1eerrsmeared,ph2eerrsmeared,
-	     (int) (vbfTag > 0.5),
-	     (int) (leptonTag > 1.5 && leptonTag < 2.5),
-	     (int) (leptonTag > 0.5 && leptonTag < 1.5),
-	     (int) (TMath::Abs(ph1sceta) < 1.4442 && TMath::Abs(ph2sceta) < 1.4442 && corrpfmet > 70. && ph1pt/mass > 45./120. &&
-		TMath::ACos(TMath::Cos(phigg-corrpfmetphi)) > 2.1 && 
-		( jetleadNoIDpt < 50. || 
-		  TMath::Sqrt( TMath::Power(ph1sceta-jetleadNoIDeta,2)+TMath::Power(TMath::ACos(TMath::Cos(ph1scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::Sqrt( TMath::Power((ph2sceta-jetleadNoIDeta),2)+TMath::Power(TMath::ACos(TMath::Cos(ph2scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::ACos(TMath::Cos(TMath::Abs(jetleadNoIDphi-corrpfmetphi))) < 2.7 ) ), evCat);
-      
-      if ( ! ( TMath::Abs(ph1sceta) < 1.4442 && TMath::Abs(ph2sceta) < 1.4442 && corrpfmet > 70. && ph1pt/mass > 45./120. &&
-		TMath::ACos(TMath::Cos(phigg-corrpfmetphi)) > 2.1 && 
-		( jetleadNoIDpt < 50. || 
-		  TMath::Sqrt( TMath::Power(ph1sceta-jetleadNoIDeta,2)+TMath::Power(TMath::ACos(TMath::Cos(ph1scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::Sqrt( TMath::Power((ph2sceta-jetleadNoIDeta),2)+TMath::Power(TMath::ACos(TMath::Cos(ph2scphi-jetleadNoIDphi)),2)) < 0.5 || TMath::ACos(TMath::Cos(TMath::Abs(jetleadNoIDphi-corrpfmetphi))) < 2.7 ) ) ) {
-	corrpfmet = -1.;
-	corrpfmetphi = -1.;
-	pfmet = -1.;
-	pfmetphi = -1.;
-      }
+//     // Leading Jet Variables
+//     dumpVar("jet1_ind"               , jet1_ind               ); // 68
+//     dumpVar("jet1_pt"                , jet1_pt                ); // 69
+//     dumpVar("jet1_eta"               , jet1_eta               ); // 70
+// 
+//     // Trailing Jet Variables
+//     dumpVar("jet2_ind"               , jet2_ind               ); // 71
+//     dumpVar("jet2_pt"                , jet2_pt                ); // 72
+//     dumpVar("jet2_eta"               , jet2_eta               ); // 73
+// 
+//     // Dijet Variables
+//     dumpVar("dijet_dEta"             , dijet_dEta             ); // 74
+//     dumpVar("dijet_Zep"              , dijet_Zep              ); // 75
+//     dumpVar("dijet_dPhi"             , dijet_dPhi             ); // 76
+//     dumpVar("dijet_Mjj"              , dijet_Mjj       , false); // 77
 
-      if ( ! (leptonTag < 2.5 && leptonTag > 1.5 )) {
-	mupt = -1.;
-	mueta = -1.;
-	mudr1=-1.;
-	mudr2=-1.;
-	mudz=-1.;
-	mud0=-1.;
-      }
-
-      if ( !(leptonTag < 1.5 && leptonTag > 0.5) ) {
-	elept = -1.;
-	eleeta = -1.;
-	elesceta = -1.;
-	eledr1 = -1.;
-	eledr2 = -1.;
-	eleMass1 = -1.;
-	eleMass2 = -1.;
-	elemisshits = -1;
-      }
-
-
-     /******** printf("FileName:DUMMY.root\tvertexId1:%d\tvertexId2:%d\tvertexId3:%d\tvertexMva1:%.4f\tvertexMva2:%.4f\tvertexMva3:%.4f\tvertexdeltaz2:%.4f\tvertexdeltaz3:%.4f\tptbal:%.4f\tptasym:%.4f\tlogspt2:%.4f\tp2conv:%.4f\tconvVtxZ1:%.4f\tconvVtxdZ1:%.4f\tconvRes1:%.4f\tconvChiProb1:%.4f\tconvNtrk1:%d\tconvindex1:%d\tconvVtxZ2:%.4f\tconvVtxdZ2:%.4f\tconvRes2:%.4f\tconvChiProb2:%.4f\tconvNtrk2:%d\tconvindex2:%d\t",
-	     vertexId1, vertexId2, vertexId3,
-	     vertexMva1, vertexMva2,vertexMva3,
-	     vtxz2-vtxz1, vtxz3-vtxz1, 
-	     ptbal, ptasym, TMath::Log(sumpt2),p2conv,
-	     convVtxZ1, (nleg1 > 0 ? convVtxZ1-vtxz1 : -99.), convVtxRes1, convVtxChi1,
-	     nleg1, convVtxIdx1,
-	     convVtxZ2, (nleg2 > 0 ? convVtxZ2-vtxz1 : -99.), convVtxRes2, convVtxChi2,
-	     nleg2, convVtxIdx2
-	     );*/
-
-      printf("FileName:DUMMY.root\tvertexId1:%d\tvertexId2:%d\tvertexId3:%d\tvertexMva1:%f\tvertexMva2:%f\tvertexMva3:%f\tvertexdeltaz2:%f\tvertexdeltaz3:%f\tptbal:%f\tptasym:%5f\tlogspt2:%f\tp2conv:%f\tconvVtxZ1:%f\tconvVtxdZ1:%f\tconvRes1:%f\tconvChiProb1:%f\tconvNtrk1:%d\tconvindex1:%d\tconvVtxZ2:%f\tconvVtxdZ2:%f\tconvRes2:%f\tconvChiProb2:%.4f\tconvNtrk2:%d\tconvindex2:%d\t",
-	     vertexId1, vertexId2, vertexId3,
-	     vertexMva1, vertexMva2,vertexMva3,
-	     vtxz2-vtxz1, vtxz3-vtxz1, 
-	     ptbal, ptasym, TMath::Log(sumpt2),p2conv,
-	     convVtxZ1, (nleg1 > 0 ? convVtxZ1-vtxz1 : -99.), convVtxRes1, convVtxChi1,
-	     nleg1, convVtxIdx1,
-	     convVtxZ2, (nleg2 > 0 ? convVtxZ2-vtxz1 : -99.), convVtxRes2, convVtxChi2,
-	     nleg2, convVtxIdx2
-	     );
-
-      
-      printf("\tmuind:%d\tmupt:%.4f\tmueta:%.4f\tmuiso:%.4f\tmuisopt:%.4f\tmud0:%.4f\tmudq:%.4f\tmudr1:%.4f\tmudr2:%.4f\telpt:%.4f\teleta:%.4f\telsceta:%.4f\telmva:%.4f\teliso:%.4f\telisoopt:%.4f\telAeff:%.4f\teld0:%.4f\teldZ:%.4f\telmishits:%d\teldr1:%.4f\teldr2:%.4f\telmeg1:%.4f\telmeg2:%.4f\tmetuncor:%.4f\tmetphiuncor:%.4f\tmetcor:%.4f\tmetphicor:%.4f\t",
-	     (int)nnn, mupt, mueta, nnn, nnn, mud0, mudz, mudr1, mudr2,
-	     elept, eleeta, elesceta, eleIdMva, nnn, nnn, nnn, nnn, nnn, elemisshits, eledr1, eledr2, eleMass1, eleMass2,
-	     pfmet, pfmetphi, corrpfmet, corrpfmetphi);
-
-      printf("\tph1scrawe:%.4f\tph1scpse:%.4f\tph1sce3x3:%.4f\tph1sce3x3seed:%.4f\tph1sce5x5:%.4f\tph1sce5x5seed:%.4f\tph2scrawe:%.4f\tph2scpse:%.4f\tph2sce3x3:%.4f\tph2sce3x3seed:%.4f\tph2sce5x5:%.4f\tph2sce5x5seed:%.4f\n",
-	     ph1scrawe, ph1scpse, ph1e3x3, ph1e3x3seed, ph1e5x5, ph1e5x5seed,
-	     ph2scrawe, ph2scpse, ph2e3x3, ph2e3x3seed, ph2e5x5, ph2e5x5seed);
-      }
-      
-    }
-    
-  }
+    std::cout << std::endl;
+  } // Loop over the tree entries.
   
   return;
-    
+
+} // void dumpMvaInputs(bool debug, TString fileName)
+
+
+//_____________________________________________________________________________
+template <class T>
+void dumpVar(const char *name, T value, bool appendTab) {
+  std::cout << name << ":" << value;
+  if (appendTab) {
+    std::cout << "\t";
+  }
 }
