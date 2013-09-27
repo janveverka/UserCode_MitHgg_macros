@@ -15,7 +15,7 @@ per_event_variables = '''
     '''.split()
 
 ## These are without a prefix.
-per_diphoton_evariables = '''
+per_diphoton_variables = '''
     mass
     rVtxSigmaMoM
     wVtxSigmaMoM
