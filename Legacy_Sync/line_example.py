@@ -9,10 +9,16 @@ import math
 ## These are without a prefix.
 per_event_variables = '''
     run
+    lumi
     event
+    rho
+    '''.split()
+
+## These are without a prefix.
+per_diphoton_evariables = '''
     mass
-    sigmaMoMrVtx
-    sigmaMoMwVtx
+    rVtxSigmaMoM
+    wVtxSigmaMoM
     vtxIndex
     vtxProb
     ptBal
@@ -77,6 +83,7 @@ per_dijet_variables = ['dijet_' + var for var in per_dijet_variables]
 all_variables = (per_event_variables +
                  leading_photon_variables +
                  trailing_photon_variables +
+                 per_diphoton_variables +
                  leading_jet_variables +
                  trailing_jet_variables +
                  per_dijet_variables)
@@ -90,9 +97,10 @@ max_num_len = int(math.floor(math.log10(len(all_variables)))) + 1
 
 #_______________________________________________________________________________
 def main():
-    print_example_line()
-    print ''
-    print_all_variables()
+    #print_example_line()
+    #print ''
+    #print_all_variables()
+    print_all_cplusplus_snippets()
 ## End of main()
 
 
@@ -112,12 +120,39 @@ def print_all_variables():
     print_variable_list(leading_photon_variables )
     print "\nTrailing Photon Variables"
     print_variable_list(trailing_photon_variables)
+    print "\nDiphoton Variables"
+    print_variable_list(per_diphoton_variables   )
     print "\nLeading Jet Variables"
     print_variable_list(leading_jet_variables    )
     print "\nTrailing Jet Variables"
     print_variable_list(trailing_jet_variables   )
     print "\nDijet Variables"
     print_variable_list(per_dijet_variables      )
+## End of print_all_variables()
+
+
+#_______________________________________________________________________________
+def print_all_cplusplus_snippets():
+    print "// Event Variables"
+    print_cplusplus_snippet(per_event_variables      )
+    
+    print "\n// Leading Photon Variables"
+    print_cplusplus_snippet(leading_photon_variables )
+    
+    print "\n// Trailing Photon Variables"
+    print_cplusplus_snippet(trailing_photon_variables)
+
+    print "\n// Diphoton Variables"
+    print_cplusplus_snippet(per_diphoton_variables)
+
+    print "\n// Leading Jet Variables"
+    print_cplusplus_snippet(leading_jet_variables    )
+    
+    print "\n// Trailing Jet Variables"
+    print_cplusplus_snippet(trailing_jet_variables   )
+    
+    print "\n// Dijet Variables"
+    print_cplusplus_snippet(per_dijet_variables      )
 ## End of print_all_variables()
 
 
@@ -130,8 +165,19 @@ def print_variable_list(variables):
 
 
 #_______________________________________________________________________________
+def print_cplusplus_snippet(variables):
+    for var in variables:
+        var_num = all_variables.index(var) + 1
+        mask = 'dumpVar("%s"%s, %s%s); // %*d'
+        var_padding = ' ' * (max_var_len - len(var))
+        args = (var, var_padding, var, var_padding, max_num_len, var_num)
+        print mask % args
+## End of print_cplusplus_snippet()
+
+
+#_______________________________________________________________________________
 def print_example_line():
-    print '\t'.join([var + ': -999' for var in all_variables])
+    print '\t'.join([var + ':-999' for var in all_variables])
 ## End of print_example_line()
 
 #_______________________________________________________________________________
