@@ -69,12 +69,14 @@ void dumpMvaInputs(bool debug = true,
 template <class T>
 void dumpVar(const char *name, T value, bool appendTab=true);
 
+
 //_____________________________________________________________________________
 void dumpMvaInputs(bool debug, TString fileName) {
  
   TFile* file = TFile::Open(fileName.Data());
 
-  TDirectory* theDir = (TDirectory*)file->FindObjectAny("PhotonTreeWriterPresel");
+  const char *treeName = "PhotonTreeWriterPresel";
+  TDirectory* theDir = (TDirectory*) file->FindObjectAny(treeName);
   TTree* theTree = (TTree*) theDir->Get("hPhotonTree");
  
   // open the MVA files, if requested
@@ -94,6 +96,29 @@ void dumpMvaInputs(bool debug, TString fileName) {
 
   float ph1eerr, ph1eerrsmeared;
   float ph2eerr, ph2eerrsmeared;
+
+  UChar_t ph1hasconversion;
+  UChar_t ph2hasconversion;
+
+  Float_t scetawidth1, scphiwidth1, scrawe1;
+  Float_t scetawidth2, scphiwidth2, scrawe2;
+
+  // 2012 id mva
+  Float_t ph1_idmva_CoviEtaiPhi;
+  Float_t ph1_idmva_s4ratio;
+  Float_t ph1_idmva_GammaIso;
+  Float_t ph1_idmva_ChargedIso_selvtx;
+  Float_t ph1_idmva_ChargedIso_0p2_selvtx;
+  Float_t ph1_idmva_ChargedIso_worstvtx;
+  Float_t ph1_idmva_PsEffWidthSigmaRR;
+
+  Float_t ph2_idmva_CoviEtaiPhi;
+  Float_t ph2_idmva_s4ratio;
+  Float_t ph2_idmva_GammaIso;
+  Float_t ph2_idmva_ChargedIso_selvtx;
+  Float_t ph2_idmva_ChargedIso_0p2_selvtx;
+  Float_t ph2_idmva_ChargedIso_worstvtx;
+  Float_t ph2_idmva_PsEffWidthSigmaRR;
 
   theTree->SetBranchAddress("run", &run);
   theTree->SetBranchAddress("lumi",&lumi);
@@ -121,6 +146,24 @@ void dumpMvaInputs(bool debug, TString fileName) {
   theTree->SetBranchAddress("ph1.pfcic4_trackIsoSel03",&ph1trackIsoSel03);
   theTree->SetBranchAddress("ph1.pfcic4_trackIsoWorst04",&ph1trackIsoWorst04);
 
+  theTree->SetBranchAddress("ph1.hasconversion",&ph1hasconversion);
+  
+  theTree->SetBranchAddress("ph1.scetawidth",&scetawidth1);
+  theTree->SetBranchAddress("ph1.scphiwidth",&scphiwidth1);
+  theTree->SetBranchAddress("ph1.scrawe",&scrawe1);
+
+  theTree->SetBranchAddress("ph1.idmva_CoviEtaiPhi",&ph1_idmva_CoviEtaiPhi);
+  theTree->SetBranchAddress("ph1.idmva_s4ratio",&ph1_idmva_s4ratio);
+  theTree->SetBranchAddress("ph1.idmva_GammaIso",&ph1_idmva_GammaIso);
+  theTree->SetBranchAddress("ph1.idmva_ChargedIso_selvtx",
+                            &ph1_idmva_ChargedIso_selvtx);
+  theTree->SetBranchAddress("ph1.idmva_ChargedIso_0p2_selvtx",
+                            &ph1_idmva_ChargedIso_0p2_selvtx);
+  theTree->SetBranchAddress("ph1.idmva_ChargedIso_worstvtx",
+                            &ph1_idmva_ChargedIso_worstvtx);
+  theTree->SetBranchAddress("ph1.idmva_PsEffWidthSigmaRR",
+                            &ph1_idmva_PsEffWidthSigmaRR);
+
   theTree->SetBranchAddress("ph2.pt",&ph2pt);
   theTree->SetBranchAddress("ph2.e",&ph2e);
 
@@ -139,9 +182,26 @@ void dumpMvaInputs(bool debug, TString fileName) {
   theTree->SetBranchAddress("ph2.pfcic4_ecalIso4",&ph2ecalIso4);
   theTree->SetBranchAddress("ph2.pfcic4_trackIsoSel03",&ph2trackIsoSel03);
   theTree->SetBranchAddress("ph2.pfcic4_trackIsoWorst04",&ph2trackIsoWorst04);
-  
+
+  theTree->SetBranchAddress("ph2.hasconversion",&ph2hasconversion);
+
+  theTree->SetBranchAddress("ph2.scetawidth",&scetawidth2);
+  theTree->SetBranchAddress("ph2.scphiwidth",&scphiwidth2);
+
+  theTree->SetBranchAddress("ph2.idmva_CoviEtaiPhi",&ph2_idmva_CoviEtaiPhi);
+  theTree->SetBranchAddress("ph2.idmva_s4ratio",&ph2_idmva_s4ratio);
+  theTree->SetBranchAddress("ph2.idmva_GammaIso",&ph2_idmva_GammaIso);
+  theTree->SetBranchAddress("ph2.idmva_ChargedIso_selvtx",
+                            &ph2_idmva_ChargedIso_selvtx);
+  theTree->SetBranchAddress("ph2.idmva_ChargedIso_0p2_selvtx",
+                            &ph2_idmva_ChargedIso_0p2_selvtx);
+  theTree->SetBranchAddress("ph2.idmva_ChargedIso_worstvtx",
+                            &ph2_idmva_ChargedIso_worstvtx);
+  theTree->SetBranchAddress("ph2.idmva_PsEffWidthSigmaRR",
+                            &ph2_idmva_PsEffWidthSigmaRR);
+  theTree->SetBranchAddress("ph2.scrawe",&scrawe2);
+
   float jet1pt, jet2pt, jet1eta, jet2eta, dijetmass, zeppenfeld, dphidijetgg;
-  float nnn = -99.;
 
   theTree->SetBranchAddress("jet1pt",&jet1pt);
   theTree->SetBranchAddress("jet2pt",&jet2pt);
@@ -328,13 +388,14 @@ void dumpMvaInputs(bool debug, TString fileName) {
   int eventCounter=0;
 
   // Loop over the entries.
+  std::cout << "Looping over " << theTree->GetEntries() << " entries." << std::endl;
   for (int i=0; i < theTree->GetEntries(); ++i) {
    
     if (eventCounter > 9 && debug ) break;
     
     theTree->GetEntry(i);
 
-    bool passPreselection = (mass < 100 &&
+    bool passPreselection = (mass > 100 &&
                              mass < 180 &&
                              ph1pt > mass/3. &&
                              ph2pt > 100./4);
@@ -357,53 +418,71 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho1_phi"               , phi1                   ); //  9
     dumpVar("pho1_e"                 , ph1e                   ); // 10
     dumpVar("pho1_eErr"              , ph1eerr                ); // 11
-//     dumpVar("pho1_isConv"            , pho1_isConv            ); // 12
-//     dumpVar("pho1_HoE"               , pho1_HoE               ); // 13
-//     dumpVar("pho1_hcalIso03"         , pho1_hcalIso03         ); // 14
-//     dumpVar("pho1_trkIso03"          , pho1_trkIso03          ); // 15
-//     dumpVar("pho1_pfChargedIsoGood02", pho1_pfChargedIsoGood02); // 16
-//     dumpVar("pho1_pfChargedIsoGood03", pho1_pfChargedIsoGood03); // 17
-//     dumpVar("pho1_pfChargedIsoBad03" , pho1_pfChargedIsoBad03 ); // 18
-//     dumpVar("pho1_pfPhotonIso03"     , pho1_pfPhotonIso03     ); // 19
-//     dumpVar("pho1_pfNeutralIso03"    , pho1_pfNeutralIso03    ); // 20
-//     dumpVar("pho1_sieie"             , pho1_sieie             ); // 21
-//     dumpVar("pho1_sieip"             , pho1_sieip             ); // 22
-//     dumpVar("pho1_etaWidth"          , pho1_etaWidth          ); // 23
-//     dumpVar("pho1_phiWidth"          , pho1_phiWidth          ); // 24
-//     dumpVar("pho1_r9"                , pho1_r9                ); // 25
-//     dumpVar("pho1_lambdaRatio"       , pho1_lambdaRatio       ); // 26
-//     dumpVar("pho1_s4Ratio"           , pho1_s4Ratio           ); // 27
-//     dumpVar("pho1_scEta"             , pho1_scEta             ); // 28
-//     dumpVar("pho1_ESEffSigmaRR"      , pho1_ESEffSigmaRR      ); // 29
-//     dumpVar("pho1_ptOverM"           , pho1_ptOverM           ); // 30
-// 
-//     // Trailing Photon Variables
-//     dumpVar("pho2_ind"               , pho2_ind               ); // 31
-//     dumpVar("pho2_scInd"             , pho2_scInd             ); // 32
-//     dumpVar("pho2_pt"                , pho2_pt                ); // 33
-//     dumpVar("pho2_eta"               , pho2_eta               ); // 34
-//     dumpVar("pho2_phi"               , pho2_phi               ); // 35
-//     dumpVar("pho2_e"                 , pho2_e                 ); // 36
-//     dumpVar("pho2_eErr"              , pho2_eErr              ); // 37
-//     dumpVar("pho2_isConv"            , pho2_isConv            ); // 38
-//     dumpVar("pho2_HoE"               , pho2_HoE               ); // 39
-//     dumpVar("pho2_hcalIso03"         , pho2_hcalIso03         ); // 40
-//     dumpVar("pho2_trkIso03"          , pho2_trkIso03          ); // 41
-//     dumpVar("pho2_pfChargedIsoGood02", pho2_pfChargedIsoGood02); // 42
-//     dumpVar("pho2_pfChargedIsoGood03", pho2_pfChargedIsoGood03); // 43
-//     dumpVar("pho2_pfChargedIsoBad03" , pho2_pfChargedIsoBad03 ); // 44
-//     dumpVar("pho2_pfPhotonIso03"     , pho2_pfPhotonIso03     ); // 45
-//     dumpVar("pho2_pfNeutralIso03"    , pho2_pfNeutralIso03    ); // 46
-//     dumpVar("pho2_sieie"             , pho2_sieie             ); // 47
-//     dumpVar("pho2_sieip"             , pho2_sieip             ); // 48
-//     dumpVar("pho2_etaWidth"          , pho2_etaWidth          ); // 49
-//     dumpVar("pho2_phiWidth"          , pho2_phiWidth          ); // 50
-//     dumpVar("pho2_r9"                , pho2_r9                ); // 51
-//     dumpVar("pho2_lambdaRatio"       , pho2_lambdaRatio       ); // 52
-//     dumpVar("pho2_s4Ratio"           , pho2_s4Ratio           ); // 53
-//     dumpVar("pho2_scEta"             , pho2_scEta             ); // 54
-//     dumpVar("pho2_ESEffSigmaRR"      , pho2_ESEffSigmaRR      ); // 55
-//     dumpVar("pho2_ptOverM"           , pho2_ptOverM           ); // 56
+    dumpVar("pho1_isConv"            ,
+            (UInt_t) ph1hasconversion                         ); // 12
+    dumpVar("pho1_HoE"               , ph1hoe                 ); // 13
+    dumpVar("pho1_hcalIso03"         ,
+            hcalisodr03_1 - 0.005 * ph1pt                     ); // 14
+    dumpVar("pho1_trkIso03"          ,
+            trkisohollowdr03_1 - 0.002 * ph1pt                ); // 15
+    dumpVar("pho1_pfChargedIsoGood02",
+            ph1_idmva_ChargedIso_0p2_selvtx                   ); // 16
+    dumpVar("pho1_pfChargedIsoGood03",
+            ph1_idmva_ChargedIso_selvtx                       ); // 17
+    dumpVar("pho1_pfChargedIsoBad03" ,
+            ph1_idmva_ChargedIso_worstvtx                     ); // 18
+    dumpVar("pho1_pfPhotonIso03"     , ph1_idmva_GammaIso     ); // 19
+    // TODO: remove pho1_pfNeutralIso03, it's not used
+    dumpVar("pho1_pfNeutralIso03"    , -999                   ); // 20
+    dumpVar("pho1_sieie"             , sieie_1                ); // 21
+    dumpVar("pho1_sieip"             , ph1_idmva_CoviEtaiPhi  ); // 22
+    dumpVar("pho1_etaWidth"          , scetawidth1            ); // 23
+    dumpVar("pho1_phiWidth"          , scphiwidth1            ); // 24
+    dumpVar("pho1_r9"                , ph1r9                  ); // 25
+    // TODO: remove pho1_lambdaRatio, it's not used
+    dumpVar("pho1_lambdaRatio"       , -999                   ); // 26
+    dumpVar("pho1_s4Ratio"           , ph1_idmva_s4ratio      ); // 27
+    dumpVar("pho1_scEta"             , ph1sceta               ); // 28
+    dumpVar("pho1_ESEffSigmaRR"      ,
+            ph1_idmva_PsEffWidthSigmaRR                       ); // 29
+    dumpVar("pho1_ptOverM"           , ph1pt / mass           ); // 30
+    dumpVar("pho1_scRawE"            , scrawe1                );
+
+    // Trailing Photon Variables
+    dumpVar("pho2_ind"               , -999                   ); // 31
+    dumpVar("pho2_scInd"             , -999                   ); // 32
+    dumpVar("pho2_pt"                , ph2pt                  ); // 33
+    dumpVar("pho2_eta"               , teta2                  ); // 34
+    dumpVar("pho2_phi"               , phi2                   ); // 35
+    dumpVar("pho2_e"                 , ph2e                   ); // 36
+    dumpVar("pho2_eErr"              , ph2eerr                ); // 37
+    dumpVar("pho2_isConv"            ,
+            (UInt_t) ph2hasconversion                         ); // 38
+    dumpVar("pho2_HoE"               , ph2hoe                 ); // 39
+    dumpVar("pho2_hcalIso03"         ,
+            hcalisodr03_1 - 0.005 * ph2pt                     ); // 40
+    dumpVar("pho2_trkIso03"          ,
+            trkisohollowdr03_1 - 0.002 * ph2pt                ); // 41
+    dumpVar("pho2_pfChargedIsoGood02",
+            ph2_idmva_ChargedIso_0p2_selvtx                   ); // 42
+    dumpVar("pho2_pfChargedIsoGood03",
+            ph2_idmva_ChargedIso_selvtx                       ); // 43
+    dumpVar("pho2_pfChargedIsoBad03" ,
+            ph2_idmva_ChargedIso_worstvtx                     ); // 44
+    dumpVar("pho2_pfPhotonIso03"     , ph2_idmva_GammaIso     ); // 45
+    dumpVar("pho2_pfNeutralIso03"    , -999                   ); // 46
+    dumpVar("pho2_sieie"             , sieie_2                ); // 47
+    dumpVar("pho2_sieip"             , ph2_idmva_CoviEtaiPhi  ); // 48
+    dumpVar("pho2_etaWidth"          , scetawidth2            ); // 49
+    dumpVar("pho2_phiWidth"          , scphiwidth2            ); // 50
+    dumpVar("pho2_r9"                , ph2r9                  ); // 51
+    dumpVar("pho2_lambdaRatio"       , -999                   ); // 52
+    dumpVar("pho2_s4Ratio"           , ph2_idmva_s4ratio      ); // 53
+    dumpVar("pho2_scEta"             , ph2sceta               ); // 54
+    dumpVar("pho2_ESEffSigmaRR"      ,
+            ph2_idmva_PsEffWidthSigmaRR                       ); // 55
+    dumpVar("pho2_ptOverM"           , ph2pt / mass           ); // 56
+    dumpVar("pho2_scRawE"            , scrawe2                );
 
     // Diphoton Variables
     dumpVar("mass"                   , mass                   ); // 57
@@ -418,21 +497,21 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("nConv"                  , vtxNconv               ); // 66
     dumpVar("cosDPhi"                , TMath::Cos(phi1-phi2)  ); // 67
 
-//     // Leading Jet Variables
-//     dumpVar("jet1_ind"               , jet1_ind               ); // 68
-//     dumpVar("jet1_pt"                , jet1_pt                ); // 69
-//     dumpVar("jet1_eta"               , jet1_eta               ); // 70
-// 
-//     // Trailing Jet Variables
-//     dumpVar("jet2_ind"               , jet2_ind               ); // 71
-//     dumpVar("jet2_pt"                , jet2_pt                ); // 72
-//     dumpVar("jet2_eta"               , jet2_eta               ); // 73
-// 
-//     // Dijet Variables
-//     dumpVar("dijet_dEta"             , dijet_dEta             ); // 74
-//     dumpVar("dijet_Zep"              , dijet_Zep              ); // 75
-//     dumpVar("dijet_dPhi"             , dijet_dPhi             ); // 76
-//     dumpVar("dijet_Mjj"              , dijet_Mjj       , false); // 77
+    // Leading Jet Variables
+    dumpVar("jet1_ind"               , -999                   ); // 68
+    dumpVar("jet1_pt"                , jet1pt                 ); // 69
+    dumpVar("jet1_eta"               , jet1eta                ); // 70
+
+    // Trailing Jet Variables
+    dumpVar("jet2_ind"               , -999                   ); // 71
+    dumpVar("jet2_pt"                , jet2pt                 ); // 72
+    dumpVar("jet2_eta"               , jet2eta                ); // 73
+
+    // Dijet Variables
+    dumpVar("dijet_dEta"             , abs(jet1eta - jet2eta) ); // 74
+    dumpVar("dijet_Zep"              , zeppenfeld             ); // 75
+    dumpVar("dijet_dPhi"             , dphidijetgg            ); // 76
+    dumpVar("dijet_Mjj"              , dijetmass       , false); // 77
 
     std::cout << std::endl;
   } // Loop over the tree entries.
