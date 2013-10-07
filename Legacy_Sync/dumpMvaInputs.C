@@ -75,7 +75,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
  
   TFile* file = TFile::Open(fileName.Data());
 
-  const char *treeName = "PhotonTreeWriterPresel";
+  const char *treeName = "PhotonTreeWriterPreselNoSmear";
   TDirectory* theDir = (TDirectory*) file->FindObjectAny(treeName);
   TTree* theTree = (TTree*) theDir->Get("hPhotonTree");
  
@@ -100,8 +100,8 @@ void dumpMvaInputs(bool debug, TString fileName) {
   UChar_t ph1hasconversion;
   UChar_t ph2hasconversion;
 
-  Float_t scetawidth1, scphiwidth1, scrawe1;
-  Float_t scetawidth2, scphiwidth2, scrawe2;
+  Float_t scetawidth1, scphiwidth1;
+  Float_t scetawidth2, scphiwidth2;
 
   // 2012 id mva
   Float_t ph1_idmva_CoviEtaiPhi;
@@ -150,7 +150,6 @@ void dumpMvaInputs(bool debug, TString fileName) {
   
   theTree->SetBranchAddress("ph1.scetawidth",&scetawidth1);
   theTree->SetBranchAddress("ph1.scphiwidth",&scphiwidth1);
-  theTree->SetBranchAddress("ph1.scrawe",&scrawe1);
 
   theTree->SetBranchAddress("ph1.idmva_CoviEtaiPhi",&ph1_idmva_CoviEtaiPhi);
   theTree->SetBranchAddress("ph1.idmva_s4ratio",&ph1_idmva_s4ratio);
@@ -199,7 +198,6 @@ void dumpMvaInputs(bool debug, TString fileName) {
                             &ph2_idmva_ChargedIso_worstvtx);
   theTree->SetBranchAddress("ph2.idmva_PsEffWidthSigmaRR",
                             &ph2_idmva_PsEffWidthSigmaRR);
-  theTree->SetBranchAddress("ph2.scrawe",&scrawe2);
 
   float jet1pt, jet2pt, jet1eta, jet2eta, dijetmass, zeppenfeld, dphidijetgg;
 
@@ -397,8 +395,8 @@ void dumpMvaInputs(bool debug, TString fileName) {
 
     bool passPreselection = (mass > 100 &&
                              mass < 180 &&
-                             ph1pt > mass/3. &&
-                             ph2pt > 100./4);
+                             ph1pt > mass/3 &&
+                             ph2pt > mass/4);
 
     if (passPreselection == false) continue;
 
@@ -435,7 +433,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     // TODO: remove pho1_pfNeutralIso03, it's not used
     dumpVar("pho1_pfNeutralIso03"    , -999                   ); // 20
     dumpVar("pho1_sieie"             , sieie_1                ); // 21
-    dumpVar("pho1_sieip"             , ph1_idmva_CoviEtaiPhi  ); // 22
+    dumpVar("pho1_cieip"             , ph1_idmva_CoviEtaiPhi  ); // 22
     dumpVar("pho1_etaWidth"          , scetawidth1            ); // 23
     dumpVar("pho1_phiWidth"          , scphiwidth1            ); // 24
     dumpVar("pho1_r9"                , ph1r9                  ); // 25
@@ -446,7 +444,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho1_ESEffSigmaRR"      ,
             ph1_idmva_PsEffWidthSigmaRR                       ); // 29
     dumpVar("pho1_ptOverM"           , ph1pt / mass           ); // 30
-    dumpVar("pho1_scRawE"            , scrawe1                );
+    dumpVar("pho1_scRawE"            , ph1scrawe              );
 
     // Trailing Photon Variables
     dumpVar("pho2_ind"               , -999                   ); // 31
@@ -472,7 +470,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho2_pfPhotonIso03"     , ph2_idmva_GammaIso     ); // 45
     dumpVar("pho2_pfNeutralIso03"    , -999                   ); // 46
     dumpVar("pho2_sieie"             , sieie_2                ); // 47
-    dumpVar("pho2_sieip"             , ph2_idmva_CoviEtaiPhi  ); // 48
+    dumpVar("pho2_cieip"             , ph2_idmva_CoviEtaiPhi  ); // 48
     dumpVar("pho2_etaWidth"          , scetawidth2            ); // 49
     dumpVar("pho2_phiWidth"          , scphiwidth2            ); // 50
     dumpVar("pho2_r9"                , ph2r9                  ); // 51
@@ -482,7 +480,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho2_ESEffSigmaRR"      ,
             ph2_idmva_PsEffWidthSigmaRR                       ); // 55
     dumpVar("pho2_ptOverM"           , ph2pt / mass           ); // 56
-    dumpVar("pho2_scRawE"            , scrawe2                );
+    dumpVar("pho2_scRawE"            , ph2scrawe              );
 
     // Diphoton Variables
     dumpVar("mass"                   , mass                   ); // 57
