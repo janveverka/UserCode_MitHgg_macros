@@ -46,17 +46,19 @@ per_photon_variables = '''
     pfChargedIsoGood03
     pfChargedIsoBad03
     pfPhotonIso03
-    pfNeutralIso03
     sieie
     sieip
     etaWidth
     phiWidth
     r9
-    lambdaRatio
     s4Ratio
     scEta
     ESEffSigmaRR
     ptOverM
+    bcInd
+    nBC
+    deltaEtaBCSC
+    deltaPhiBCSC
     '''.split()
 leading_photon_variables  = ['pho1_' + var for var in per_photon_variables]
 trailing_photon_variables = ['pho2_' + var for var in per_photon_variables]
