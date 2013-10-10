@@ -237,9 +237,9 @@ void dumpMvaInputs(bool debug, TString fileName) {
   theTree->SetBranchAddress("ph1.trkisohollowdr03",&trkisohollowdr03_1);
   theTree->SetBranchAddress("ph2.trkisohollowdr03",&trkisohollowdr03_2);
 
-  float hovere_1,hovere_2;
-  theTree->SetBranchAddress("ph1.hovere",&hovere_1);
-  theTree->SetBranchAddress("ph2.hovere",&hovere_2);
+  float hoveretower_1, hoveretower_2;
+  theTree->SetBranchAddress("ph1.hoveretower", &hoveretower_1);
+  theTree->SetBranchAddress("ph2.hoveretower", &hoveretower_2);
 
   float sieie_1,sieie_2;
   theTree->SetBranchAddress("ph1.sigietaieta",&sieie_1);
@@ -459,7 +459,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho1_eErr"              , ph1eerr                ); // 11
     dumpVar("pho1_isConv"            ,
             (UInt_t) ph1hasconversion                         ); // 12
-    dumpVar("pho1_HoE"               , ph1hoe                 ); // 13
+    dumpVar("pho1_HoE"               , hoveretower_1          ); // 13
     dumpVar("pho1_hcalIso03"         ,
             hcalisodr03_1 - 0.005 * ph1pt                     ); // 14
     dumpVar("pho1_trkIso03"          ,
@@ -486,6 +486,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
             ph1_idmva_PsEffWidthSigmaRR                       ); // 29
     dumpVar("pho1_ptOverM"           , pho1_ptOverM           ); // 30
     dumpVar("pho1_scRawE"            , ph1scrawe              );
+    dumpVar("pho1_idMVA"             , idmva_1                );
 
     // Trailing Photon Variables
     dumpVar("pho2_ind"               , ph2index               ); // 31
@@ -497,7 +498,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho2_eErr"              , ph2eerr                ); // 37
     dumpVar("pho2_isConv"            ,
             (UInt_t) ph2hasconversion                         ); // 38
-    dumpVar("pho2_HoE"               , ph2hoe                 ); // 39
+    dumpVar("pho2_HoE"               , hoveretower_2          ); // 39
     dumpVar("pho2_hcalIso03"         ,
             hcalisodr03_1 - 0.005 * ph2pt                     ); // 40
     dumpVar("pho2_trkIso03"          ,
@@ -522,6 +523,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
             ph2_idmva_PsEffWidthSigmaRR                       ); // 55
     dumpVar("pho2_ptOverM"           , pho2_ptOverM           ); // 56
     dumpVar("pho2_scRawE"            , ph2scrawe              );
+    dumpVar("pho2_idMVA"             , idmva_2                );
 
     // Diphoton Variables
     dumpVar("mass"                   , mass                   ); // 57
