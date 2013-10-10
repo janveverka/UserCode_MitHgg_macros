@@ -391,6 +391,28 @@ void dumpMvaInputs(bool debug, TString fileName) {
   theTree->SetBranchAddress("ph2.e5x5",&ph2e5x5);
   theTree->SetBranchAddress("ph2.e5x5seed",&ph2e5x5seed);
 
+  // Setup the diphoton BDT
+  Float_t rVtxSigmaMoM, wVtxSigmaMoM, cosDPhi;
+  Float_t pho1_ptOverM;
+  Float_t pho2_ptOverM;
+  Float_t diphoMVA;
+  
+  TMVA::Reader* reader = new TMVA::Reader();
+  reader->AddVariable("masserrsmeared/mass"        , &rVtxSigmaMoM);
+  reader->AddVariable("masserrsmearedwrongvtx/mass", &wVtxSigmaMoM);
+  reader->AddVariable("vtxprob"                    , &vtxprob     );
+  reader->AddVariable("ph1.pt/mass"                , &pho1_ptOverM);
+  reader->AddVariable("ph2.pt/mass"                , &pho1_ptOverM);
+  reader->AddVariable("ph1.eta"                    , &teta1       );
+  reader->AddVariable("ph2.eta"                    , &teta2       );
+  reader->AddVariable("TMath::Cos(ph1.phi-ph2.phi)", &cosDPhi     );
+  reader->AddVariable("ph1.idmva"                  , &idmva_1     );
+  reader->AddVariable("ph2.idmva"                  , &idmva_2     );
+  const char *diphotonWeights = (
+    "/home/veverka/cms/cmssw/031/CMSSW_5_3_10_patch1/src/MitPhysics/data/"
+    "HggBambu_SMDipho_Oct01_redqcdweightallsigevenbkg_BDTG.weights.xml"
+    );
+  reader->BookMVA("BDTG", diphotonWeights);
 
   TRandom3 rng(0);
 
@@ -412,6 +434,14 @@ void dumpMvaInputs(bool debug, TString fileName) {
     if (passPreselection == false) continue;
 
     eventCounter++;
+
+    // Calculate needed variables
+    rVtxSigmaMoM = masserr_ns / mass;
+    wVtxSigmaMoM = masserrwvtx_ns / mass;
+    cosDPhi = TMath::Cos(phi1 - phi2);
+    pho1_ptOverM = ph1pt / mass;
+    pho2_ptOverM = ph2pt / mass;
+    diphoMVA = reader->EvaluateMVA("BDTG");
 
     // Event Variables
     dumpVar("run"                    , run                    ); //  1
@@ -454,7 +484,7 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho1_scEta"             , ph1sceta               ); // 28
     dumpVar("pho1_ESEffSigmaRR"      ,
             ph1_idmva_PsEffWidthSigmaRR                       ); // 29
-    dumpVar("pho1_ptOverM"           , ph1pt / mass           ); // 30
+    dumpVar("pho1_ptOverM"           , pho1_ptOverM           ); // 30
     dumpVar("pho1_scRawE"            , ph1scrawe              );
 
     // Trailing Photon Variables
@@ -490,13 +520,13 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("pho2_scEta"             , ph2sceta               ); // 54
     dumpVar("pho2_ESEffSigmaRR"      ,
             ph2_idmva_PsEffWidthSigmaRR                       ); // 55
-    dumpVar("pho2_ptOverM"           , ph2pt / mass           ); // 56
+    dumpVar("pho2_ptOverM"           , pho2_ptOverM           ); // 56
     dumpVar("pho2_scRawE"            , ph2scrawe              );
 
     // Diphoton Variables
     dumpVar("mass"                   , mass                   ); // 57
-    dumpVar("rVtxSigmaMoM"           , masserr_ns / mass      ); // 58
-    dumpVar("wVtxSigmaMoM"           , masserrwvtx_ns / mass  ); // 59
+    dumpVar("rVtxSigmaMoM"           , rVtxSigmaMoM           ); // 58
+    dumpVar("wVtxSigmaMoM"           , wVtxSigmaMoM           ); // 59
     dumpVar("vtxProb"                , vtxprob                ); // 61
     
     float logSPt2 = TMath::Log(sumpt2);
@@ -510,7 +540,8 @@ void dumpMvaInputs(bool debug, TString fileName) {
     dumpVar("p2Conv"                 , p2conv                 ); // 65
     dumpVar("nConv"                  , vtxNconv               ); // 66
     
-    dumpVar("cosDPhi"                , TMath::Cos(phi1-phi2)  ); // 67
+    dumpVar("cosDPhi"                , cosDPhi                ); // 67
+    dumpVar("diphoMVA"               , diphoMVA               );
 
     // Leading Jet Variables
     if (jet1pt < 0) {
